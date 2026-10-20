@@ -27,6 +27,7 @@
         --shadow: 0 14px 40px rgba(214, 58, 118, .16);
         --radius: 26px;
         --heart: ' ♡';
+        --scheme: light;
     }
     @media (prefers-color-scheme: dark) {
         :root:not([data-theme="light"]) {
@@ -41,6 +42,7 @@
             --shadow: none;
             --radius: 20px;
             --heart: '';
+        --scheme: dark;
         }
     }
     :root[data-theme="dark"] {
@@ -55,6 +57,7 @@
         --shadow: none;
         --radius: 20px;
         --heart: '';
+        --scheme: dark;
     }
 
     * { box-sizing: border-box; margin: 0; }
@@ -100,8 +103,8 @@
         cursor: pointer;
     }
     #lang:hover { color: var(--text); }
-    .actions { display: flex; align-items: center; gap: 14px; }
-    #theme {
+    .actions { position: relative; display: flex; align-items: center; gap: 14px; }
+    #widgetsBtn, #theme {
         padding: 0;
         border: none;
         background: none;
@@ -111,7 +114,23 @@
         filter: grayscale(1);
         transition: opacity .15s, filter .15s;
     }
-    #theme:hover { opacity: 1; filter: none; }
+    #widgetsBtn:hover, #widgetsBtn[aria-expanded="true"], #theme:hover { opacity: 1; filter: none; }
+
+    #widgetMenu {
+        position: absolute;
+        top: calc(100% + 10px);
+        inset-inline-end: 0;
+        z-index: 1000;
+        display: grid;
+        gap: 12px;
+        padding: 14px 16px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        white-space: nowrap;
+    }
+    #widgetMenu[hidden] { display: none; }
 
     .field {
         display: flex;
@@ -210,6 +229,98 @@
 
     footer { font-size: 12px; color: var(--muted); }
 
+    .widget {
+        position: fixed;
+        top: 0;
+        left: 0;
+        padding: 6px 12px 10px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        touch-action: none;
+        user-select: none;
+        cursor: grab;
+    }
+    .widget.dragging { cursor: grabbing; }
+    .widget-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        font-size: 11px;
+        color: var(--muted);
+    }
+    .widget button {
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        cursor: pointer;
+    }
+    .widget button:hover { color: var(--text); }
+    .widget .close { font-size: 16px; line-height: 1; }
+    .widget input, .widget textarea {
+        border: none;
+        background: none;
+        outline: none;
+        color: var(--text);
+        font: inherit;
+    }
+    .widget-big {
+        font-size: 26px;
+        font-weight: 500;
+        line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+    }
+    .widget-small { font-size: 12px; color: var(--muted); }
+    #alarms {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        align-items: center;
+        gap: 2px 12px;
+    }
+    .alarm-row { display: contents; }
+    .alarm-row span { font-size: 13px; color: var(--muted); }
+    .alarm-row.ringing span { color: var(--accent); font-weight: 500; }
+    .alarm-row input[type="time"] {
+        font-size: 20px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        color-scheme: var(--scheme);
+    }
+    #w-note { background: var(--accent-soft); }
+    #noteText {
+        display: block;
+        width: 180px;
+        height: 110px;
+        min-width: 120px;
+        min-height: 50px;
+        margin-top: 4px;
+        resize: both;
+        font-size: 14px;
+        line-height: 1.4;
+        touch-action: auto;
+        user-select: text;
+        cursor: text;
+    }
+    #noteText::placeholder { color: var(--muted); opacity: .6; }
+    .widget .stop {
+        display: none;
+        width: 100%;
+        margin-top: 8px;
+        padding: 6px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: var(--card);
+        font-weight: 500;
+    }
+    .widget .stop:hover { color: var(--card); }
+    .widget.ringing .stop { display: block; }
+    .widget.ringing { border-color: var(--accent); animation: ring 1s infinite; }
+    @keyframes ring { 50% { background: var(--accent-soft); } }
+
     kbd {
         padding: 1px 5px;
         border: 1px solid currentColor;
@@ -225,8 +336,14 @@
     <header>
         <h1 id="title"></h1>
         <div class="actions">
+            <button id="widgetsBtn" type="button" aria-expanded="false">🧩</button>
             <button id="theme" type="button"></button>
             <button id="lang" type="button"></button>
+            <div id="widgetMenu" hidden>
+                <label class="switch"><input type="checkbox" data-widget="clock"><span class="track"></span><span data-t="clock"></span></label>
+                <label class="switch"><input type="checkbox" data-widget="alarm"><span class="track"></span><span data-t="alarm"></span></label>
+                <label class="switch"><input type="checkbox" data-widget="note"><span class="track"></span><span data-t="note"></span></label>
+            </div>
         </div>
     </header>
 
@@ -255,6 +372,37 @@
 </main>
 <footer id="credit"></footer>
 
+<div class="widget" id="w-clock" hidden>
+    <div class="widget-bar"><span data-t="clock"></span><button class="close" type="button">×</button></div>
+    <div id="clockTime" class="widget-big" dir="ltr"></div>
+    <div id="clockDate" class="widget-small"></div>
+</div>
+<div class="widget" id="w-alarm" hidden>
+    <div class="widget-bar"><span data-t="alarm"></span><button class="close" type="button">×</button></div>
+    <div id="alarms">
+        <div class="alarm-row" data-alarm="long">
+            <span data-t="alarmLong"></span>
+            <input type="time" dir="ltr">
+            <label class="switch"><input type="checkbox"><span class="track"></span></label>
+        </div>
+        <div class="alarm-row" data-alarm="short">
+            <span data-t="alarmShort"></span>
+            <input type="time" dir="ltr">
+            <label class="switch"><input type="checkbox"><span class="track"></span></label>
+        </div>
+        <div class="alarm-row" data-alarm="end">
+            <span data-t="alarmEnd"></span>
+            <input type="time" dir="ltr">
+            <label class="switch"><input type="checkbox"><span class="track"></span></label>
+        </div>
+    </div>
+    <button class="stop" type="button" data-t="stop"></button>
+</div>
+<div class="widget" id="w-note" hidden>
+    <div class="widget-bar"><span data-t="note"></span><button class="close" type="button">×</button></div>
+    <textarea id="noteText" dir="auto"></textarea>
+</div>
+
 <script src="fees.js"></script>
 <script>
 const translations = {
@@ -270,6 +418,16 @@ const translations = {
         lightMode: 'מצב בהיר',
         darkMode: 'מצב כהה',
         credit: 'נעשה עם ❤️ על ידי עמית כהן ו־Claude',
+        widgets: 'ווידג׳טים',
+        clock: 'שעון',
+        alarm: 'שעון מעורר',
+        alarmLong: 'ארוכה',
+        alarmShort: 'קצרה',
+        alarmEnd: 'ירידה',
+        note: 'פתק',
+        notePlaceholder: 'כתבו משהו…',
+        close: 'סגירה',
+        stop: 'עצירה',
         otherLang: 'English'
     },
     en: {
@@ -284,6 +442,16 @@ const translations = {
         lightMode: 'Light mode',
         darkMode: 'Dark mode',
         credit: 'Made with ❤️ by Amit Cohen and Claude',
+        widgets: 'Widgets',
+        clock: 'Clock',
+        alarm: 'Alarms',
+        alarmLong: 'Long',
+        alarmShort: 'Short',
+        alarmEnd: 'Ending',
+        note: 'Note',
+        notePlaceholder: 'Write something…',
+        close: 'Close',
+        stop: 'Stop',
         otherLang: 'עברית'
     }
 };
@@ -311,6 +479,7 @@ function applyLanguage() {
     $('bonusLabel').textContent = t.bonus;
     $('walkerLabel').textContent = t.walker;
     $('credit').textContent = t.credit;
+    translateWidgets();
     updateThemeButton();
     render();
 }
@@ -401,6 +570,13 @@ $('lang').addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.widget.ringing').forEach(stopRinging);
+        $('widgetMenu').hidden = true;
+        $('widgetsBtn').setAttribute('aria-expanded', 'false');
+    }
+    // Let widgets (e.g. the note) take typing without triggering shortcuts
+    if (e.target.closest('.widget, #widgetMenu')) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -411,6 +587,212 @@ document.addEventListener('keydown', e => {
         render();
     }
 });
+
+// Widgets: small draggable panels, all off by default. Which ones are on,
+// where they sit and what they hold is remembered in localStorage.
+const WIDGETS = ['clock', 'alarm', 'note'];
+let widgets = {};
+try { widgets = JSON.parse(store.get('widgets')) || {}; } catch {}
+for (const name of WIDGETS) widgets[name] = { on: false, ...widgets[name] };
+delete widgets.timer;   // removed widget
+const saveWidgets = () => store.set('widgets', JSON.stringify(widgets));
+const widgetEl = name => $(`w-${name}`);
+const DEFAULT_Y = { clock: 16, alarm: 112, note: 300 };
+let topZ = 10;
+
+function translateWidgets() {
+    const t = translations[lang];
+    document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t[el.dataset.t]; });
+    document.querySelectorAll('.widget .close').forEach(el => { el.title = t.close; });
+    $('widgetsBtn').title = t.widgets;
+    $('noteText').placeholder = t.notePlaceholder;
+}
+
+// Position a widget, keeping it fully inside the window
+function placeWidget(name, x, y) {
+    const el = widgetEl(name);
+    el.style.left = Math.max(0, Math.min(x, innerWidth - el.offsetWidth)) + 'px';
+    el.style.top = Math.max(0, Math.min(y, innerHeight - el.offsetHeight)) + 'px';
+}
+
+function setWidget(name, on) {
+    const w = widgets[name];
+    const el = widgetEl(name);
+    w.on = on;
+    el.hidden = !on;
+    $('widgetMenu').querySelector(`[data-widget="${name}"]`).checked = on;
+    if (on) {
+        el.style.zIndex = ++topZ;
+        tick();
+        // Default spot: stacked down the left edge
+        placeWidget(name, w.x ?? 16, w.y ?? DEFAULT_Y[name]);
+    } else {
+        stopRinging(el);
+    }
+    saveWidgets();
+}
+
+for (const name of WIDGETS) {
+    const el = widgetEl(name);
+    el.addEventListener('pointerdown', e => {
+        el.style.zIndex = ++topZ;
+        if (e.button !== 0 || e.target.closest('input, textarea, button, label')) return;
+        const dx = e.clientX - el.offsetLeft;
+        const dy = e.clientY - el.offsetTop;
+        const move = e => placeWidget(name, e.clientX - dx, e.clientY - dy);
+        el.setPointerCapture(e.pointerId);
+        el.classList.add('dragging');
+        el.addEventListener('pointermove', move);
+        el.addEventListener('lostpointercapture', () => {
+            el.removeEventListener('pointermove', move);
+            el.classList.remove('dragging');
+            widgets[name].x = el.offsetLeft;
+            widgets[name].y = el.offsetTop;
+            saveWidgets();
+        }, { once: true });
+    });
+    el.querySelector('.close').addEventListener('click', () => setWidget(name, false));
+    el.querySelector('.stop')?.addEventListener('click', () => stopRinging(el));
+}
+
+// Pull widgets back on screen when the window shrinks, without
+// forgetting where they were
+addEventListener('resize', () => {
+    for (const name of WIDGETS) {
+        if (widgets[name].on) placeWidget(name, widgets[name].x ?? 16, widgets[name].y ?? DEFAULT_Y[name]);
+    }
+});
+
+$('widgetsBtn').addEventListener('click', () => {
+    const open = $('widgetMenu').hidden;
+    $('widgetMenu').hidden = !open;
+    $('widgetsBtn').setAttribute('aria-expanded', String(open));
+});
+document.addEventListener('pointerdown', e => {
+    if (e.target.closest('#widgetMenu, #widgetsBtn')) return;
+    $('widgetMenu').hidden = true;
+    $('widgetsBtn').setAttribute('aria-expanded', 'false');
+});
+$('widgetMenu').addEventListener('change', e => setWidget(e.target.dataset.widget, e.target.checked));
+
+// Ringing alarms: a beep every second until stopped, at most a minute.
+// Browsers only allow sound after a user gesture, so the audio context is
+// unlocked when an alarm is set, and on any later interaction.
+let audio = null;
+let beepTimer = null;
+function unlockAudio() {
+    try {
+        audio ??= new AudioContext();
+        audio.resume();
+    } catch {}
+}
+function beep() {
+    if (!audio) return;
+    const t = audio.currentTime;
+    for (let i = 0; i < 3; i++) {
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        const at = t + i * 0.2;
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.0001, at);
+        gain.gain.exponentialRampToValueAtTime(0.3, at + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.15);
+        osc.connect(gain).connect(audio.destination);
+        osc.start(at);
+        osc.stop(at + 0.16);
+    }
+}
+function startRinging(el) {
+    el.classList.add('ringing');
+    clearTimeout(el.ringTimeout);
+    el.ringTimeout = setTimeout(() => stopRinging(el), 60000);
+    if (!beepTimer) {
+        beep();
+        beepTimer = setInterval(beep, 1000);
+    }
+}
+function stopRinging(el) {
+    el.classList.remove('ringing');
+    el.querySelectorAll('.ringing').forEach(row => row.classList.remove('ringing'));
+    clearTimeout(el.ringTimeout);
+    if (!document.querySelector('.widget.ringing')) {
+        clearInterval(beepTimer);
+        beepTimer = null;
+    }
+}
+const ringable = () => widgets.alarm.on && Object.values(widgets.alarm.alarms).some(a => a.armed);
+document.addEventListener('pointerdown', () => { if (ringable()) unlockAudio(); });
+document.addEventListener('keydown', () => { if (ringable()) unlockAudio(); });
+
+// Alarms for the reps' shift: long break, short break and end of shift
+const alarm = widgets.alarm;   // alarms: { long, short, end } each with time ("HH:MM"), armed
+alarm.alarms ??= {};
+delete alarm.time;             // from the earlier single alarm
+delete alarm.armed;
+const lastAlarm = {};          // per alarm, date + time it last rang, so it rings once
+document.querySelectorAll('.alarm-row').forEach(row => {
+    const a = alarm.alarms[row.dataset.alarm] ??= {};
+    const time = row.querySelector('input[type="time"]');
+    const armed = row.querySelector('input[type="checkbox"]');
+    time.value = a.time || '';
+    armed.checked = !!a.armed;
+    time.addEventListener('change', () => {
+        a.time = time.value;
+        a.armed = !!a.time;   // setting a time arms the alarm
+        armed.checked = a.armed;
+        if (a.armed) unlockAudio();
+        saveWidgets();
+    });
+    armed.addEventListener('change', () => {
+        a.armed = armed.checked;
+        if (a.armed) unlockAudio();
+        saveWidgets();
+    });
+});
+
+// Sticky note
+const note = $('noteText');
+note.value = widgets.note.text || '';
+if (widgets.note.w) {
+    note.style.width = widgets.note.w + 'px';
+    note.style.height = widgets.note.h + 'px';
+}
+note.addEventListener('input', () => {
+    widgets.note.text = note.value;
+    saveWidgets();
+});
+new ResizeObserver(() => {
+    if (!note.offsetWidth) return;   // hidden
+    widgets.note.w = note.offsetWidth;
+    widgets.note.h = note.offsetHeight;
+    saveWidgets();
+}).observe(note);
+
+// Update the clock and check the alarms
+function tick() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const hm = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    if (widgets.clock.on) {
+        $('clockTime').textContent = `${hm}:${pad(now.getSeconds())}`;
+        $('clockDate').textContent = now.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB',
+            { weekday: 'long', day: 'numeric', month: 'short' });
+    }
+    const today = now.toDateString() + hm;
+    if (alarm.on) {
+        document.querySelectorAll('.alarm-row').forEach(row => {
+            const id = row.dataset.alarm;
+            const a = alarm.alarms[id];
+            if (!a.armed || a.time !== hm || lastAlarm[id] === today) return;
+            lastAlarm[id] = today;
+            row.classList.add('ringing');
+            startRinging(widgetEl('alarm'));
+        });
+    }
+}
+setInterval(tick, 250);
+
+for (const name of WIDGETS) if (widgets[name].on) setWidget(name, true);
 
 $('bonus').value = store.get('bonus') || '';
 applyLanguage();
