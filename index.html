@@ -264,7 +264,6 @@ const translations = {
         tooShort: 'מרחק מינימלי 10 מטר',
         copyFailed: 'לא ניתן להעתיק',
         tv: 'וידאו צף (שומר על המסך דולק)',
-        shuffle: 'סרטון אחר',
         lightMode: 'מצב בהיר',
         darkMode: 'מצב כהה',
         otherLang: 'English'
@@ -279,7 +278,6 @@ const translations = {
         tooShort: 'Minimum distance is 10 meters',
         copyFailed: 'Could not copy',
         tv: 'Floating video (keeps screen awake)',
-        shuffle: 'Another video',
         lightMode: 'Light mode',
         darkMode: 'Dark mode',
         otherLang: 'עברית'
@@ -437,92 +435,34 @@ document.addEventListener('keydown', requestWakeLock);
 requestWakeLock();
 
 // Floating muted 10-hour video in a Document Picture-in-Picture window
-// (Chrome/Edge only). The window is always visible, so its own wake lock
-// keeps the screen awake even when the calculator tab is in the background.
-const VIDEOS = [
-    'jIQ6UV2onyI', // Nyan Cat
-    'sVYlkLauPlY', // Peanut Butter Jelly Time
-    'Sagg08DrO5U', // Gandalf Sax Guy
-    '6iFbuIpe68k', // Epic Sax Guy
-    'TJL4Y3aGPuA', // Trololo
-    'TJ5XsyPOv0o', // Crumb cat dancing to Wii Shop music
-    '0sTGxJ7rp9w', // catJAM
-    'pxw-5qfJ1dk', // Shreksophone
-    'rRPQs_kM_nw', // Dancing Polish Cow
-    'f7CFjkr7g7o', // Coffin Dance
-    'CdEpmU9pRaE', // Keyboard Cat
-    'oPLObjVAvIU', // Rickroll
-    'sVJDc-iJtSQ', // Baby Groot dancing
-    'BTodGJB1ckA', // ｄａｎｃｉｎ
-    '0aBkyfz9anQ'  // He-Man HEYYEYAAEYAAAEYAEYAA
-];
-const PIP_STYLE = `
-    html, body { margin: 0; height: 100%; overflow: hidden; background: #000; }
-    iframe { display: block; width: 100%; height: 100%; border: 0; pointer-events: none; }
-    #shuffle {
-        position: fixed; top: 8px; right: 8px;
-        padding: 6px 8px; border: none; border-radius: 8px;
-        background: rgba(0, 0, 0, .6); color: #fff; font-size: 16px;
-        cursor: pointer; opacity: 0; transition: opacity .15s;
-    }
-    body:hover #shuffle { opacity: 1; }
-`;
+// (Chrome/Edge). The window is always visible, so its own wake lock keeps
+// the screen awake even when the calculator tab is in the background.
+// The player itself is player.html: YouTube rejects embeds from the PiP
+// window's blank document because it sends no referrer (error 153).
 let pip = null;
-
-function randomVideo(except) {
-    const pool = VIDEOS.filter(id => id !== except);
-    return pool[Math.floor(Math.random() * pool.length)];
-}
 
 async function openVideo() {
     pip = await documentPictureInPicture.requestWindow({ width: 360, height: 203 });
-    const doc = pip.document;
-    doc.head.innerHTML = `<style>${PIP_STYLE}</style>`;
-    doc.body.innerHTML = `<div id="player"></div><button id="shuffle" type="button">🔀</button>`;
-    doc.getElementById('shuffle').title = translations[lang].shuffle;
+    const win = pip;
+    const doc = win.document;
+    doc.head.innerHTML = `<style>
+        html, body { margin: 0; height: 100%; overflow: hidden; background: #000; }
+        iframe { display: block; width: 100%; height: 100%; border: 0; }
+    </style>`;
+    const frame = doc.createElement('iframe');
+    frame.src = new URL(`player.html?lang=${lang}`, location.href).href;
+    frame.allow = 'autoplay';
+    doc.body.appendChild(frame);
+
     $('tv').classList.add('on');
-    pip.addEventListener('pagehide', () => {
+    win.addEventListener('pagehide', () => {
         pip = null;
         $('tv').classList.remove('on');
     });
 
-    const win = pip;
     const lock = () => win.navigator.wakeLock?.request('screen').catch(() => {});
     lock();
     doc.addEventListener('visibilitychange', lock);
-
-    let player = null;
-    let currentId = randomVideo();
-    let failures = 0;
-    const play = id => {
-        currentId = id;
-        player.loadVideoById(id);
-        player.mute();
-    };
-    doc.getElementById('shuffle').addEventListener('click', () => {
-        if (player) play(randomVideo(currentId));
-    });
-
-    // The IFrame API runs inside the PiP window so the player belongs to it
-    win.onYouTubeIframeAPIReady = () => {
-        player = new win.YT.Player(doc.getElementById('player'), {
-            videoId: currentId,
-            playerVars: { autoplay: 1, mute: 1, controls: 0, disablekb: 1, rel: 0, playsinline: 1, origin: location.origin },
-            events: {
-                onReady: e => { e.target.mute(); e.target.playVideo(); },
-                onStateChange: e => {
-                    if (e.data === win.YT.PlayerState.PLAYING) failures = 0;
-                    if (e.data === win.YT.PlayerState.ENDED) e.target.seekTo(0);
-                },
-                // Embedding disabled or video removed: skip to another one,
-                // but stop if every video fails (e.g. YouTube blocked)
-                onError: () => { if (++failures < VIDEOS.length) play(randomVideo(currentId)); }
-            }
-        });
-    };
-    const script = doc.createElement('script');
-    script.src = 'https://www.youtube.com/iframe_api';
-    doc.head.appendChild(script);
 }
 
 if ('documentPictureInPicture' in window) {
