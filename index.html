@@ -335,6 +335,29 @@ document.addEventListener('keydown', e => {
 
 $('bonus').value = store.get('bonus') || '';
 applyLanguage();
+
+// Keep the screen awake while the page is visible. The browser releases the
+// lock when the tab is hidden, so re-request on visibility change; also retry
+// on interaction in case the browser wanted a user gesture first.
+let wakeLock = null;
+let wakeLockPending = false;
+async function requestWakeLock() {
+    if (!('wakeLock' in navigator) || wakeLock || wakeLockPending) return;
+    if (document.visibilityState !== 'visible') return;
+    wakeLockPending = true;
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } catch {
+        // Denied (e.g. battery saver) - try again on the next interaction
+    } finally {
+        wakeLockPending = false;
+    }
+}
+document.addEventListener('visibilitychange', requestWakeLock);
+document.addEventListener('pointerdown', requestWakeLock);
+document.addEventListener('keydown', requestWakeLock);
+requestWakeLock();
 </script>
 </body>
 </html>
