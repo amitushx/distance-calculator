@@ -7,7 +7,7 @@
 <title>Video</title>
 <style>
     html, body { margin: 0; height: 100%; overflow: hidden; background: #000; }
-    iframe { display: block; width: 100%; height: 100%; border: 0; pointer-events: none; }
+    iframe { display: block; width: 100%; height: 100%; border: 0; }
     #shuffle {
         position: fixed;
         top: 8px;
@@ -19,10 +19,10 @@
         color: #fff;
         font-size: 16px;
         cursor: pointer;
-        opacity: 0;
+        opacity: .35;
         transition: opacity .15s;
     }
-    body:hover #shuffle { opacity: 1; }
+    #shuffle:hover { opacity: 1; }
 </style>
 </head>
 <body>
@@ -85,6 +85,8 @@ function onYouTubeIframeAPIReady() {
             onStateChange: e => {
                 if (e.data === YT.PlayerState.PLAYING) failures = 0;
                 if (e.data === YT.PlayerState.ENDED) e.target.seekTo(0);
+                // The video stays clickable so ads can be skipped; undo any pause
+                if (e.data === YT.PlayerState.PAUSED) e.target.playVideo();
             },
             // Embedding disabled or video removed: skip to another one,
             // but stop if every video fails (e.g. YouTube blocked)
