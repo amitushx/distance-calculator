@@ -62,6 +62,8 @@
     body {
         min-height: 100vh;
         display: grid;
+        grid-template-rows: 1fr auto;
+        gap: 16px;
         place-items: center;
         padding: 16px;
         background: var(--bg);
@@ -206,6 +208,8 @@
     #amount small { font-size: .5em; font-weight: 500; margin-inline-end: 4px; }
     #caption { display: block; margin-top: 10px; font-size: 13px; opacity: .8; }
 
+    footer { font-size: 12px; color: var(--muted); }
+
     kbd {
         padding: 1px 5px;
         border: 1px solid currentColor;
@@ -249,6 +253,7 @@
         <span id="caption"></span>
     </button>
 </main>
+<footer id="credit"></footer>
 
 <script src="fees.js"></script>
 <script>
@@ -264,6 +269,7 @@ const translations = {
         copyFailed: 'לא ניתן להעתיק',
         lightMode: 'מצב בהיר',
         darkMode: 'מצב כהה',
+        credit: 'נעשה עם ❤️ על ידי עמית כהן ו־Claude',
         otherLang: 'English'
     },
     en: {
@@ -277,6 +283,7 @@ const translations = {
         copyFailed: 'Could not copy',
         lightMode: 'Light mode',
         darkMode: 'Dark mode',
+        credit: 'Made with ❤️ by Amit Cohen and Claude',
         otherLang: 'עברית'
     }
 };
@@ -303,6 +310,7 @@ function applyLanguage() {
     $('metersLabel').textContent = t.meters;
     $('bonusLabel').textContent = t.bonus;
     $('walkerLabel').textContent = t.walker;
+    $('credit').textContent = t.credit;
     updateThemeButton();
     render();
 }
