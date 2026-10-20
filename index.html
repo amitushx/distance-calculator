@@ -4,29 +4,57 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>מחשבון מרחק</title>
+<script>
+    // Apply a saved theme before first paint to avoid a flash
+    try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    } catch {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bg: #f3f3ef;
+        --bg: #fff0f6;
+        --dots: #ffd3e6;
         --card: #ffffff;
-        --text: #1b1b19;
-        --muted: #8b8b84;
-        --line: #e2e2dc;
-        --accent: #0f766e;
-        --accent-soft: #e5f1ef;
+        --text: #4a2537;
+        --muted: #a8607f;
+        --line: #f8d2e3;
+        --accent: #d63a76;
+        --accent-soft: #ffe4ef;
+        --shadow: 0 14px 40px rgba(214, 58, 118, .16);
+        --radius: 26px;
+        --heart: ' ♡';
     }
     @media (prefers-color-scheme: dark) {
-        :root {
+        :root:not([data-theme="light"]) {
             --bg: #111111;
+            --dots: transparent;
             --card: #1b1b1b;
             --text: #ececea;
             --muted: #85857f;
             --line: #2d2d2b;
             --accent: #2dd4bf;
             --accent-soft: #15302c;
+            --shadow: none;
+            --radius: 20px;
+            --heart: '';
         }
+    }
+    :root[data-theme="dark"] {
+        --bg: #111111;
+        --dots: transparent;
+        --card: #1b1b1b;
+        --text: #ececea;
+        --muted: #85857f;
+        --line: #2d2d2b;
+        --accent: #2dd4bf;
+        --accent-soft: #15302c;
+        --shadow: none;
+        --radius: 20px;
+        --heart: '';
     }
 
     * { box-sizing: border-box; margin: 0; }
@@ -37,6 +65,8 @@
         place-items: center;
         padding: 16px;
         background: var(--bg);
+        background-image: radial-gradient(var(--dots) 1.5px, transparent 1.5px);
+        background-size: 22px 22px;
         color: var(--text);
         font-family: Rubik, system-ui, sans-serif;
     }
@@ -47,7 +77,8 @@
         padding: 28px;
         background: var(--card);
         border: 1px solid var(--line);
-        border-radius: 20px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
     }
 
     header {
@@ -57,6 +88,7 @@
         margin-bottom: 28px;
     }
     h1 { font-size: 15px; font-weight: 500; color: var(--muted); }
+    h1::after { content: var(--heart); color: var(--accent); }
     #lang {
         border: none;
         background: none;
@@ -67,7 +99,7 @@
     }
     #lang:hover { color: var(--text); }
     .actions { display: flex; align-items: center; gap: 14px; }
-    #tv {
+    #tv, #theme {
         padding: 0;
         border: none;
         background: none;
@@ -77,7 +109,7 @@
         filter: grayscale(1);
         transition: opacity .15s, filter .15s;
     }
-    #tv:hover, #tv.on { opacity: 1; filter: none; }
+    #tv:hover, #tv.on, #theme:hover { opacity: 1; filter: none; }
 
     .field {
         display: flex;
@@ -190,6 +222,7 @@
         <h1 id="title"></h1>
         <div class="actions">
             <button id="tv" type="button" hidden>📺</button>
+            <button id="theme" type="button"></button>
             <button id="lang" type="button"></button>
         </div>
     </header>
@@ -223,15 +256,17 @@
 const translations = {
     he: {
         title: 'מחשבון מרחק',
-        meters: 'מטר',
+        meters: 'מטרים',
         bonus: '% בונוס',
-        walker: 'הולך רגל',
+        walker: 'ווקר',
         hint: '<kbd>Enter</kbd> או לחיצה להעתקה',
         copied: 'הועתק ✓',
         tooShort: 'מרחק מינימלי 10 מטר',
         copyFailed: 'לא ניתן להעתיק',
         tv: 'וידאו צף (שומר על המסך דולק)',
         shuffle: 'סרטון אחר',
+        lightMode: 'מצב בהיר',
+        darkMode: 'מצב כהה',
         otherLang: 'English'
     },
     en: {
@@ -245,6 +280,8 @@ const translations = {
         copyFailed: 'Could not copy',
         tv: 'Floating video (keeps screen awake)',
         shuffle: 'Another video',
+        lightMode: 'Light mode',
+        darkMode: 'Dark mode',
         otherLang: 'עברית'
     }
 };
@@ -272,7 +309,20 @@ function applyLanguage() {
     $('metersLabel').textContent = t.meters;
     $('bonusLabel').textContent = t.bonus;
     $('walkerLabel').textContent = t.walker;
+    updateThemeButton();
     render();
+}
+
+// Theme: follows the system until the user picks one with the header button
+const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+function isDark() {
+    const theme = document.documentElement.dataset.theme;
+    return theme ? theme === 'dark' : darkQuery.matches;
+}
+// The button shows the mode it switches to
+function updateThemeButton() {
+    $('theme').textContent = isDark() ? '☀️' : '🌙';
+    $('theme').title = translations[lang][isDark() ? 'lightMode' : 'darkMode'];
 }
 
 // Recalculate and show the payment for the current inputs
@@ -335,6 +385,13 @@ $('result').addEventListener('click', () => {
     copyAmount();
     $('distance').focus();
 });
+$('theme').addEventListener('click', () => {
+    const theme = isDark() ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    store.set('theme', theme);
+    updateThemeButton();
+});
+darkQuery.addEventListener('change', updateThemeButton);
 $('lang').addEventListener('click', () => {
     lang = lang === 'he' ? 'en' : 'he';
     store.set('lang', lang);
