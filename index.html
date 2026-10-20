@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מחשבון מרחק</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #f3f3ef;
+        --card: #ffffff;
+        --text: #1b1b19;
+        --muted: #8b8b84;
+        --line: #e2e2dc;
+        --accent: #0f766e;
+        --accent-soft: #e5f1ef;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #111111;
+            --card: #1b1b1b;
+            --text: #ececea;
+            --muted: #85857f;
+            --line: #2d2d2b;
+            --accent: #2dd4bf;
+            --accent-soft: #15302c;
+        }
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+
+    body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Rubik, system-ui, sans-serif;
+    }
+
+    main {
+        width: 100%;
+        max-width: 380px;
+        padding: 28px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+    }
+
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+    }
+    h1 { font-size: 15px; font-weight: 500; color: var(--muted); }
+    #lang {
+        border: none;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    #lang:hover { color: var(--text); }
+
+    .field {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid var(--line);
+        transition: border-color .15s;
+    }
+    .field:focus-within { border-color: var(--accent); }
+    .field input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        background: none;
+        outline: none;
+        color: var(--text);
+        font: inherit;
+        font-variant-numeric: tabular-nums;
+        -moz-appearance: textfield;
+    }
+    .field input::-webkit-outer-spin-button,
+    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .field input::placeholder { color: var(--line); }
+    .field span { color: var(--muted); font-size: 14px; white-space: nowrap; }
+
+    #distanceField input { font-size: 44px; font-weight: 500; }
+
+    .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 20px;
+    }
+    #bonusField { width: 120px; }
+    #bonusField input { font-size: 18px; }
+
+    .switch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        cursor: pointer;
+        user-select: none;
+    }
+    .switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .track {
+        position: relative;
+        width: 38px;
+        height: 22px;
+        border-radius: 11px;
+        background: var(--line);
+        transition: background .15s;
+    }
+    .track::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        inset-inline-start: 3px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--card);
+        transition: transform .15s;
+    }
+    .switch input:checked + .track { background: var(--accent); }
+    .switch input:checked + .track::after { transform: translateX(16px); }
+    [dir="rtl"] .switch input:checked + .track::after { transform: translateX(-16px); }
+    .switch input:focus-visible + .track { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    #result {
+        display: block;
+        width: 100%;
+        margin-top: 28px;
+        padding: 22px 0 18px;
+        border: none;
+        border-radius: 14px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font: inherit;
+        cursor: pointer;
+        transition: transform .08s;
+    }
+    #result:active { transform: scale(.98); }
+    #result:disabled { cursor: default; color: var(--muted); background: var(--bg); }
+    #amount {
+        display: block;
+        font-size: 56px;
+        font-weight: 700;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+    #amount small { font-size: .5em; font-weight: 500; margin-inline-end: 4px; }
+    #caption { display: block; margin-top: 10px; font-size: 13px; opacity: .8; }
+
+    kbd {
+        padding: 1px 5px;
+        border: 1px solid currentColor;
+        border-radius: 4px;
+        font: inherit;
+        font-size: 11px;
+        opacity: .7;
+    }
+</style>
+</head>
+<body>
+<main>
+    <header>
+        <h1 id="title"></h1>
+        <button id="lang" type="button"></button>
+    </header>
+
+    <label class="field" id="distanceField">
+        <input id="distance" type="number" inputmode="numeric" min="0" placeholder="0" autofocus autocomplete="off">
+        <span id="metersLabel"></span>
+    </label>
+
+    <div class="row">
+        <label class="field" id="bonusField">
+            <input id="bonus" type="number" inputmode="decimal" min="0" placeholder="0" autocomplete="off">
+            <span id="bonusLabel"></span>
+        </label>
+        <label class="switch">
+            <input id="walker" type="checkbox">
+            <span class="track"></span>
+            <span id="walkerLabel"></span>
+            <kbd>W</kbd>
+        </label>
+    </div>
+
+    <button id="result" type="button" disabled>
+        <span id="amount" dir="ltr">—</span>
+        <span id="caption"></span>
+    </button>
+</main>
+
+<script src="fees.js"></script>
+<script>
+const translations = {
+    he: {
+        title: 'מחשבון מרחק',
+        meters: 'מטר',
+        bonus: '% בונוס',
+        walker: 'הולך רגל',
+        hint: '<kbd>Enter</kbd> או לחיצה להעתקה',
+        copied: 'הועתק ✓',
+        tooShort: 'מרחק מינימלי 10 מטר',
+        copyFailed: 'לא ניתן להעתיק',
+        otherLang: 'English'
+    },
+    en: {
+        title: 'Distance Calculator',
+        meters: 'meters',
+        bonus: '% bonus',
+        walker: 'Walker',
+        hint: '<kbd>Enter</kbd> or click to copy',
+        copied: 'Copied ✓',
+        tooShort: 'Minimum distance is 10 meters',
+        copyFailed: 'Could not copy',
+        otherLang: 'עברית'
+    }
+};
+
+const $ = id => document.getElementById(id);
+
+// localStorage may be unavailable (private mode, blocked storage)
+const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+};
+
+let lang = store.get('lang') === 'en' ? 'en' : 'he';
+let current = null;      // payment currently shown, or null if none
+let captionTimer = null;
+
+function applyLanguage() {
+    const t = translations[lang];
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+    document.title = t.title;
+    $('title').textContent = t.title;
+    $('lang').textContent = t.otherLang;
+    $('metersLabel').textContent = t.meters;
+    $('bonusLabel').textContent = t.bonus;
+    $('walkerLabel').textContent = t.walker;
+    render();
+}
+
+// Recalculate and show the payment for the current inputs
+function render() {
+    const t = translations[lang];
+    const raw = $('distance').value;
+    const meters = Number(raw);
+    const bonus = Math.max(Number($('bonus').value) || 0, 0);
+
+    clearTimeout(captionTimer);
+    if (raw === '' || !(meters >= 10)) {
+        current = null;
+        $('amount').textContent = '—';
+        $('caption').textContent = raw === '' ? ' ' : t.tooShort;
+    } else {
+        current = payment(meters, bonus, $('walker').checked);
+        $('amount').innerHTML = `<small>₪</small>${current}`;
+        $('caption').innerHTML = t.hint;
+    }
+    $('result').disabled = current === null;
+}
+
+// Fallback for browsers without the async clipboard API
+function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok ? Promise.resolve() : Promise.reject();
+}
+
+// Copy the numeric amount only (no ₪ sign)
+function copyAmount() {
+    if (current === null) return;
+    const t = translations[lang];
+    const text = String(current);
+    const write = navigator.clipboard
+        ? navigator.clipboard.writeText(text).catch(() => legacyCopy(text))
+        : legacyCopy(text);
+    write.then(
+        () => { $('caption').textContent = t.copied; },
+        () => { $('caption').textContent = t.copyFailed; }
+    ).finally(() => {
+        clearTimeout(captionTimer);
+        captionTimer = setTimeout(render, 1500);
+    });
+}
+
+$('distance').addEventListener('input', render);
+$('bonus').addEventListener('input', () => {
+    store.set('bonus', $('bonus').value);
+    render();
+});
+$('walker').addEventListener('change', render);
+$('result').addEventListener('click', () => {
+    copyAmount();
+    $('distance').focus();
+});
+$('lang').addEventListener('click', () => {
+    lang = lang === 'he' ? 'en' : 'he';
+    store.set('lang', lang);
+    applyLanguage();
+});
+
+document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        copyAmount();
+    } else if (e.code === 'KeyW') {   // physical key, works on Hebrew layout too
+        e.preventDefault();
+        $('walker').checked = !$('walker').checked;
+        render();
+    }
+});
+
+$('bonus').value = store.get('bonus') || '';
+applyLanguage();
+</script>
+</body>
+</html>
