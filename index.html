@@ -5,20 +5,63 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>מחשבון מרחק</title>
 <script>
-    // Apply a saved theme before first paint to avoid a flash
+    // Apply the saved palette and mode before first paint to avoid a flash.
+    // The mode follows the system until the user picks one.
+    let theme = null, palette = null;
     try {
-        const theme = localStorage.getItem('theme');
-        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+        theme = localStorage.getItem('theme');
+        palette = localStorage.getItem('palette');
     } catch {}
+    if (theme !== 'light' && theme !== 'dark') {
+        theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.dataset.mode = theme;
+    if (palette) document.documentElement.dataset.palette = palette;
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+    /*
+     * Palettes come in light/dark pairs: data-palette picks the pair,
+     * data-mode the variant. Classic (no data-palette) is the default.
+     * --backdrop is the page background, --panel the cards on top of it
+     * (see-through on gradients), --card a solid surface color.
+     */
     :root {
-        --bg: #fff0f6;
-        --dots: #ffd3e6;
+        --backdrop: #ffffff;
+        --bg: #f4f4f5;
         --card: #ffffff;
+        --panel: var(--card);
+        --text: #18181b;
+        --muted: #71717a;
+        --line: #e4e4e7;
+        --accent: #0d9488;
+        --accent-soft: #e3f4f2;
+        --shadow: 0 10px 30px rgba(0, 0, 0, .06);
+        --radius: 20px;
+        --heart: '';
+        --scheme: light;
+    }
+    :root[data-mode="dark"] {
+        --backdrop: #000000;
+        --bg: #0a0a0a;
+        --card: #141414;
+        --panel: var(--card);
+        --text: #ececea;
+        --muted: #85857f;
+        --line: #2a2a2a;
+        --accent: #2dd4bf;
+        --accent-soft: #12302b;
+        --shadow: none;
+        --scheme: dark;
+    }
+
+    :root[data-palette="cute"] {
+        --backdrop: radial-gradient(#ffd3e6 1.5px, transparent 1.5px) 0 0 / 22px 22px, #fff0f6;
+        --bg: #fff0f6;
+        --card: #ffffff;
+        --panel: var(--card);
         --text: #4a2537;
         --muted: #a8607f;
         --line: #f8d2e3;
@@ -27,37 +70,97 @@
         --shadow: 0 14px 40px rgba(214, 58, 118, .16);
         --radius: 26px;
         --heart: ' ♡';
-        --scheme: light;
     }
-    @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-            --bg: #111111;
-            --dots: transparent;
-            --card: #1b1b1b;
-            --text: #ececea;
-            --muted: #85857f;
-            --line: #2d2d2b;
-            --accent: #2dd4bf;
-            --accent-soft: #15302c;
-            --shadow: none;
-            --radius: 20px;
-            --heart: '';
-        --scheme: dark;
-        }
-    }
-    :root[data-theme="dark"] {
-        --bg: #111111;
-        --dots: transparent;
-        --card: #1b1b1b;
-        --text: #ececea;
-        --muted: #85857f;
-        --line: #2d2d2b;
-        --accent: #2dd4bf;
-        --accent-soft: #15302c;
+    :root[data-palette="cute"][data-mode="dark"] {
+        --backdrop: radial-gradient(#3a1d2c 1.5px, transparent 1.5px) 0 0 / 22px 22px, #1a0f15;
+        --bg: #1f121a;
+        --card: #261620;
+        --text: #fbe7f0;
+        --muted: #b07a94;
+        --line: #3d2533;
+        --accent: #f472b6;
+        --accent-soft: #3a1a2b;
         --shadow: none;
-        --radius: 20px;
-        --heart: '';
-        --scheme: dark;
+    }
+
+    :root[data-palette="sunset"] {
+        --backdrop: linear-gradient(135deg, #ffecd2, #fcb69f);
+        --bg: #fff4ec;
+        --card: #ffffff;
+        --panel: rgba(255, 255, 255, .8);
+        --text: #4a2a1d;
+        --muted: #a0644a;
+        --line: #f5d2bf;
+        --accent: #e8590c;
+        --accent-soft: #ffe8d9;
+        --shadow: 0 14px 40px rgba(232, 89, 12, .15);
+        --radius: 22px;
+    }
+    :root[data-palette="sunset"][data-mode="dark"] {
+        --backdrop: linear-gradient(135deg, #2b1331, #5a1f2b 55%, #8a3b1c);
+        --bg: #1e0f17;
+        --card: #2a1520;
+        --panel: rgba(24, 12, 20, .7);
+        --text: #fde8dc;
+        --muted: #c08a74;
+        --line: rgba(255, 255, 255, .12);
+        --accent: #ff8a4c;
+        --accent-soft: rgba(255, 138, 76, .16);
+        --shadow: none;
+    }
+
+    :root[data-palette="ocean"] {
+        --backdrop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='32'%3E%3Cpath d='M0 16 Q15 6 30 16 T60 16 T90 16 T120 16' fill='none' stroke='%232563eb' stroke-opacity='.12' stroke-width='1.5'/%3E%3C/svg%3E") 0 0 / 120px 32px,
+            linear-gradient(135deg, #e0f2fe, #c7d2fe);
+        --bg: #eef6ff;
+        --card: #ffffff;
+        --panel: rgba(255, 255, 255, .8);
+        --text: #0f2a44;
+        --muted: #5b7895;
+        --line: #cfe0f2;
+        --accent: #2563eb;
+        --accent-soft: #e0ebff;
+        --shadow: 0 14px 40px rgba(37, 99, 235, .12);
+        --radius: 22px;
+    }
+    :root[data-palette="ocean"][data-mode="dark"] {
+        --backdrop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='32'%3E%3Cpath d='M0 16 Q15 6 30 16 T60 16 T90 16 T120 16' fill='none' stroke='%2338bdf8' stroke-opacity='.1' stroke-width='1.5'/%3E%3C/svg%3E") 0 0 / 120px 32px,
+            linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        --bg: #0c1a21;
+        --card: #13262f;
+        --panel: rgba(10, 22, 30, .7);
+        --text: #e3f2f8;
+        --muted: #7fa3b3;
+        --line: rgba(255, 255, 255, .1);
+        --accent: #38bdf8;
+        --accent-soft: rgba(56, 189, 248, .15);
+        --shadow: none;
+    }
+
+    :root[data-palette="aurora"] {
+        --backdrop: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+        --bg: #f3ecff;
+        --card: #ffffff;
+        --panel: rgba(255, 255, 255, .78);
+        --text: #2e1f4a;
+        --muted: #7a68a0;
+        --line: #e2d6f7;
+        --accent: #7c3aed;
+        --accent-soft: #efe6ff;
+        --shadow: 0 14px 40px rgba(124, 58, 237, .14);
+        --radius: 22px;
+    }
+    :root[data-palette="aurora"][data-mode="dark"] {
+        --backdrop: linear-gradient(135deg, #1a1036, #2a1458 45%, #0d4a4a);
+        --bg: #140d29;
+        --card: #1f1640;
+        --panel: rgba(16, 10, 32, .7);
+        --text: #ece6ff;
+        --muted: #9a8cc4;
+        --line: rgba(255, 255, 255, .1);
+        --accent: #a78bfa;
+        --accent-soft: rgba(167, 139, 250, .16);
+        --shadow: none;
     }
 
     * { box-sizing: border-box; margin: 0; }
@@ -69,9 +172,8 @@
         gap: 16px;
         place-items: center;
         padding: 16px;
-        background: var(--bg);
-        background-image: radial-gradient(var(--dots) 1.5px, transparent 1.5px);
-        background-size: 22px 22px;
+        background: var(--backdrop);
+        background-attachment: fixed;
         color: var(--text);
         font-family: Rubik, system-ui, sans-serif;
     }
@@ -80,7 +182,8 @@
         width: 100%;
         max-width: 380px;
         padding: 28px;
-        background: var(--card);
+        background: var(--panel);
+        backdrop-filter: blur(16px);
         border: 1px solid var(--line);
         border-radius: var(--radius);
         box-shadow: var(--shadow);
@@ -104,7 +207,7 @@
     }
     #lang:hover { color: var(--text); }
     .actions { position: relative; display: flex; align-items: center; gap: 14px; }
-    #widgetsBtn, #theme {
+    #widgetsBtn, #paletteBtn, #theme {
         padding: 0;
         border: none;
         background: none;
@@ -114,9 +217,10 @@
         filter: grayscale(1);
         transition: opacity .15s, filter .15s;
     }
-    #widgetsBtn:hover, #widgetsBtn[aria-expanded="true"], #theme:hover { opacity: 1; filter: none; }
+    #widgetsBtn:hover, #paletteBtn:hover, #theme:hover,
+    #widgetsBtn[aria-expanded="true"], #paletteBtn[aria-expanded="true"] { opacity: 1; filter: none; }
 
-    #widgetMenu {
+    .menu {
         position: absolute;
         top: calc(100% + 10px);
         inset-inline-end: 0;
@@ -130,7 +234,32 @@
         box-shadow: var(--shadow);
         white-space: nowrap;
     }
-    #widgetMenu[hidden] { display: none; }
+    .menu[hidden] { display: none; }
+    #paletteMenu button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--text);
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    /* Each swatch shows the pair: light half and dark half */
+    .swatch {
+        display: flex;
+        width: 24px;
+        height: 24px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        overflow: hidden;
+        transform: rotate(45deg);
+    }
+    .swatch i { flex: 1; }
+    #paletteMenu [aria-checked="true"] .swatch { outline: 2px solid var(--accent); outline-offset: 2px; }
+    #paletteMenu [aria-checked="true"] { font-weight: 500; }
 
     .field {
         display: flex;
@@ -234,7 +363,8 @@
         top: 0;
         left: 0;
         padding: 6px 12px 10px;
-        background: var(--card);
+        background: var(--panel);
+        backdrop-filter: blur(16px);
         border: 1px solid var(--line);
         border-radius: 14px;
         box-shadow: var(--shadow);
@@ -337,9 +467,17 @@
         <h1 id="title"></h1>
         <div class="actions">
             <button id="widgetsBtn" type="button" aria-expanded="false">🧩</button>
+            <button id="paletteBtn" type="button" aria-expanded="false">🎨</button>
             <button id="theme" type="button"></button>
             <button id="lang" type="button"></button>
-            <div id="widgetMenu" hidden>
+            <div id="paletteMenu" class="menu" role="menu" hidden>
+                <button type="button" role="menuitemradio" data-palette="classic"><span class="swatch"><i style="background: #ffffff"></i><i style="background: #000000"></i></span><span data-t="classic"></span></button>
+                <button type="button" role="menuitemradio" data-palette="cute"><span class="swatch"><i style="background: #ffd3e6"></i><i style="background: #261620"></i></span><span data-t="cute"></span></button>
+                <button type="button" role="menuitemradio" data-palette="sunset"><span class="swatch"><i style="background: linear-gradient(#ffecd2, #fcb69f)"></i><i style="background: linear-gradient(#5a1f2b, #8a3b1c)"></i></span><span data-t="sunset"></span></button>
+                <button type="button" role="menuitemradio" data-palette="ocean"><span class="swatch"><i style="background: linear-gradient(#e0f2fe, #c7d2fe)"></i><i style="background: linear-gradient(#0f2027, #2c5364)"></i></span><span data-t="ocean"></span></button>
+                <button type="button" role="menuitemradio" data-palette="aurora"><span class="swatch"><i style="background: linear-gradient(#e0c3fc, #8ec5fc)"></i><i style="background: linear-gradient(#2a1458, #0d4a4a)"></i></span><span data-t="aurora"></span></button>
+            </div>
+            <div id="widgetMenu" class="menu" hidden>
                 <label class="switch"><input type="checkbox" data-widget="clock"><span class="track"></span><span data-t="clock"></span></label>
                 <label class="switch"><input type="checkbox" data-widget="alarm"><span class="track"></span><span data-t="alarm"></span></label>
                 <label class="switch"><input type="checkbox" data-widget="note"><span class="track"></span><span data-t="note"></span></label>
@@ -418,6 +556,12 @@ const translations = {
         lightMode: 'מצב בהיר',
         darkMode: 'מצב כהה',
         credit: 'נעשה עם ❤️ על ידי עמית כהן ו־Claude',
+        palette: 'ערכת צבעים',
+        classic: 'קלאסי',
+        cute: 'קיוט',
+        sunset: 'שקיעה',
+        ocean: 'אוקיינוס',
+        aurora: 'זוהר',
         widgets: 'ווידג׳טים',
         clock: 'שעון',
         alarm: 'שעון מעורר',
@@ -442,6 +586,12 @@ const translations = {
         lightMode: 'Light mode',
         darkMode: 'Dark mode',
         credit: 'Made with ❤️ by Amit Cohen and Claude',
+        palette: 'Theme',
+        classic: 'Classic',
+        cute: 'Cute',
+        sunset: 'Sunset',
+        ocean: 'Ocean',
+        aurora: 'Aurora',
         widgets: 'Widgets',
         clock: 'Clock',
         alarm: 'Alarms',
@@ -479,17 +629,16 @@ function applyLanguage() {
     $('bonusLabel').textContent = t.bonus;
     $('walkerLabel').textContent = t.walker;
     $('credit').textContent = t.credit;
+    $('paletteBtn').title = t.palette;
     translateWidgets();
     updateThemeButton();
     render();
 }
 
-// Theme: follows the system until the user picks one with the header button
+// Mode (light/dark): follows the system until the user picks one with the
+// header button. The palette menu picks which light/dark pair is used.
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
-function isDark() {
-    const theme = document.documentElement.dataset.theme;
-    return theme ? theme === 'dark' : darkQuery.matches;
-}
+const isDark = () => document.documentElement.dataset.mode === 'dark';
 // The button shows the mode it switches to
 function updateThemeButton() {
     $('theme').textContent = isDark() ? '☀️' : '🌙';
@@ -557,12 +706,56 @@ $('result').addEventListener('click', () => {
     $('distance').focus();
 });
 $('theme').addEventListener('click', () => {
-    const theme = isDark() ? 'light' : 'dark';
-    document.documentElement.dataset.theme = theme;
-    store.set('theme', theme);
+    const mode = isDark() ? 'light' : 'dark';
+    document.documentElement.dataset.mode = mode;
+    store.set('theme', mode);
     updateThemeButton();
 });
-darkQuery.addEventListener('change', updateThemeButton);
+darkQuery.addEventListener('change', () => {
+    const saved = store.get('theme');
+    if (saved === 'light' || saved === 'dark') return;
+    document.documentElement.dataset.mode = darkQuery.matches ? 'dark' : 'light';
+    updateThemeButton();
+});
+
+function setPalette(name) {
+    if (name === 'classic') delete document.documentElement.dataset.palette;
+    else document.documentElement.dataset.palette = name;
+    store.set('palette', name);
+    updatePaletteMenu();
+}
+function updatePaletteMenu() {
+    const current = document.documentElement.dataset.palette || 'classic';
+    $('paletteMenu').querySelectorAll('button').forEach(b => {
+        b.setAttribute('aria-checked', String(b.dataset.palette === current));
+    });
+}
+$('paletteMenu').addEventListener('click', e => {
+    const button = e.target.closest('[data-palette]');
+    if (button) setPalette(button.dataset.palette);
+});
+updatePaletteMenu();
+
+// Header menus: one open at a time, closed by clicking elsewhere or Escape
+const MENUS = { widgetsBtn: 'widgetMenu', paletteBtn: 'paletteMenu' };
+function closeMenus(except) {
+    for (const [button, menu] of Object.entries(MENUS)) {
+        if (button === except) continue;
+        $(menu).hidden = true;
+        $(button).setAttribute('aria-expanded', 'false');
+    }
+}
+for (const [button, menu] of Object.entries(MENUS)) {
+    $(button).addEventListener('click', () => {
+        closeMenus(button);
+        const open = $(menu).hidden;
+        $(menu).hidden = !open;
+        $(button).setAttribute('aria-expanded', String(open));
+    });
+}
+document.addEventListener('pointerdown', e => {
+    if (!e.target.closest('.menu, #widgetsBtn, #paletteBtn')) closeMenus();
+});
 $('lang').addEventListener('click', () => {
     lang = lang === 'he' ? 'en' : 'he';
     store.set('lang', lang);
@@ -572,11 +765,10 @@ $('lang').addEventListener('click', () => {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         document.querySelectorAll('.widget.ringing').forEach(stopRinging);
-        $('widgetMenu').hidden = true;
-        $('widgetsBtn').setAttribute('aria-expanded', 'false');
+        closeMenus();
     }
     // Let widgets (e.g. the note) take typing without triggering shortcuts
-    if (e.target.closest('.widget, #widgetMenu')) return;
+    if (e.target.closest('.widget, .menu')) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -663,16 +855,6 @@ addEventListener('resize', () => {
     }
 });
 
-$('widgetsBtn').addEventListener('click', () => {
-    const open = $('widgetMenu').hidden;
-    $('widgetMenu').hidden = !open;
-    $('widgetsBtn').setAttribute('aria-expanded', String(open));
-});
-document.addEventListener('pointerdown', e => {
-    if (e.target.closest('#widgetMenu, #widgetsBtn')) return;
-    $('widgetMenu').hidden = true;
-    $('widgetsBtn').setAttribute('aria-expanded', 'false');
-});
 $('widgetMenu').addEventListener('change', e => setWidget(e.target.dataset.widget, e.target.checked));
 
 // Ringing alarms: a beep every second until stopped, at most a minute.
