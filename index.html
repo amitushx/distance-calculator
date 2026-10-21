@@ -169,6 +169,7 @@
         min-height: 100vh;
         display: grid;
         grid-template-rows: 1fr auto;
+        grid-template-columns: minmax(0, 1fr);   /* shrink the card to narrow screens */
         gap: 16px;
         place-items: center;
         padding: 16px;
@@ -189,6 +190,7 @@
         box-shadow: var(--shadow);
     }
 
+    @media (max-width: 360px) { main { padding: 20px; } }
     header {
         display: flex;
         justify-content: space-between;
@@ -295,7 +297,7 @@
         gap: 16px;
         margin-top: 20px;
     }
-    #bonusField { width: 150px; }
+    #bonusField { width: 150px; min-width: 0; }
     #bonusField input { font-size: 18px; }
 
     .switch {
