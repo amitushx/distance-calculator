@@ -295,7 +295,7 @@
         gap: 16px;
         margin-top: 20px;
     }
-    #bonusField { width: 120px; }
+    #bonusField { width: 150px; }
     #bonusField input { font-size: 18px; }
 
     .switch {
@@ -420,6 +420,23 @@
         font-variant-numeric: tabular-nums;
         color-scheme: var(--scheme);
     }
+    #nextAlarm { margin-top: 6px; font-variant-numeric: tabular-nums; }
+    .alarm-sound {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+        font-size: 13px;
+    }
+    .alarm-sound select {
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--text);
+        font: inherit;
+        cursor: pointer;
+        color-scheme: var(--scheme);
+    }
     #w-note { background: var(--accent-soft); }
     #noteText {
         display: block;
@@ -538,6 +555,7 @@
         <label class="field" id="bonusField">
             <input id="bonus" type="number" inputmode="decimal" min="0" placeholder="0" autocomplete="off">
             <span id="bonusLabel"></span>
+            <kbd>B</kbd>
         </label>
         <label class="switch">
             <input id="walker" type="checkbox">
@@ -578,6 +596,15 @@
             <label class="switch"><input type="checkbox"><span class="track"></span></label>
         </div>
     </div>
+    <div id="nextAlarm" class="widget-small" hidden></div>
+    <div class="alarm-sound">
+        <select id="alarmSound">
+            <option value="beep" data-t="soundBeep"></option>
+            <option value="chime" data-t="soundChime"></option>
+            <option value="siren" data-t="soundSiren"></option>
+            <option value="meow" data-t="soundMeow"></option>
+        </select>
+    </div>
     <button class="stop" type="button" data-t="stop"></button>
 </div>
 <div id="alarmOverlay" role="alertdialog" aria-labelledby="alarmName" hidden>
@@ -598,7 +625,7 @@ const translations = {
         meters: 'מטרים',
         bonus: '% בונוס',
         walker: 'ווקר',
-        hint: '<kbd>Enter</kbd> או לחיצה להעתקה',
+        hint: '<kbd>Enter</kbd> או לחיצה להעתקה · <kbd>Esc</kbd> לניקוי',
         copied: 'הועתק ✓',
         tooShort: 'מרחק מינימלי 10 מטר',
         copyFailed: 'לא ניתן להעתיק',
@@ -617,6 +644,11 @@ const translations = {
         alarmLong: 'ארוכה',
         alarmShort: 'קצרה',
         alarmEnd: 'ירידה',
+        nextIn: 'בעוד',
+        soundBeep: 'צפצוף',
+        soundChime: 'פעמון',
+        soundSiren: 'סירנה',
+        soundMeow: 'מיאו 🐱',
         note: 'פתק',
         notePlaceholder: 'כתבו משהו…',
         close: 'סגירה',
@@ -628,7 +660,7 @@ const translations = {
         meters: 'meters',
         bonus: '% bonus',
         walker: 'Walker',
-        hint: '<kbd>Enter</kbd> or click to copy',
+        hint: '<kbd>Enter</kbd> or click to copy · <kbd>Esc</kbd> to clear',
         copied: 'Copied ✓',
         tooShort: 'Minimum distance is 10 meters',
         copyFailed: 'Could not copy',
@@ -647,6 +679,11 @@ const translations = {
         alarmLong: 'Long',
         alarmShort: 'Short',
         alarmEnd: 'Ending',
+        nextIn: 'in',
+        soundBeep: 'Beep',
+        soundChime: 'Chime',
+        soundSiren: 'Siren',
+        soundMeow: 'Meow 🐱',
         note: 'Note',
         notePlaceholder: 'Write something…',
         close: 'Close',
@@ -813,8 +850,11 @@ $('lang').addEventListener('click', () => {
 
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+        // Escape first stops an alarm or closes a menu; otherwise it clears
+        const busy = document.querySelector('.widget.ringing, .menu:not([hidden])');
         document.querySelectorAll('.widget.ringing').forEach(stopRinging);
         closeMenus();
+        if (busy) return;
     }
     // Let widgets (e.g. the note) take typing without triggering shortcuts
     if (e.target.closest('.widget, .menu, #alarmOverlay')) return;
@@ -822,10 +862,19 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
         e.preventDefault();
         copyAmount();
+    } else if (e.key === 'Escape') {
+        $('distance').value = '';
+        $('walker').checked = false;
+        render();
+        $('distance').focus();
     } else if (e.code === 'KeyW') {   // physical key, works on Hebrew layout too
         e.preventDefault();
         $('walker').checked = !$('walker').checked;
         render();
+    } else if (e.code === 'KeyB') {
+        e.preventDefault();
+        $('bonus').focus();
+        $('bonus').select();
     }
 });
 
@@ -877,7 +926,7 @@ for (const name of WIDGETS) {
     const el = widgetEl(name);
     el.addEventListener('pointerdown', e => {
         el.style.zIndex = ++topZ;
-        if (e.button !== 0 || e.target.closest('input, textarea, button, label')) return;
+        if (e.button !== 0 || e.target.closest('input, textarea, select, button, label')) return;
         const dx = e.clientX - el.offsetLeft;
         const dy = e.clientY - el.offsetTop;
         const move = e => placeWidget(name, e.clientX - dx, e.clientY - dy);
@@ -906,49 +955,125 @@ addEventListener('resize', () => {
 
 $('widgetMenu').addEventListener('change', e => setWidget(e.target.dataset.widget, e.target.checked));
 
-// Ringing alarms: a beep every second until stopped, at most a minute.
+// Ringing alarms: the chosen sound on repeat until stopped, at most a minute.
+// The whole minute is scheduled on the audio clock up front, since timers
+// in a background tab can be throttled to once a minute.
 // Browsers only allow sound after a user gesture, so the audio context is
 // unlocked when an alarm is set, and on any later interaction.
 let audio = null;
-let beepTimer = null;
+let ringOut = null;      // gain node the ringing sound plays through
+let previewOut = null;   // same for the preview when picking a sound
 function unlockAudio() {
     try {
         audio ??= new AudioContext();
         audio.resume();
+        if (alarm.sound === 'meow') loadMeow();
     } catch {}
 }
-function beep() {
-    if (!audio) return;
-    const t = audio.currentTime;
-    for (let i = 0; i < 3; i++) {
-        const osc = audio.createOscillator();
-        const gain = audio.createGain();
-        const at = t + i * 0.2;
-        osc.frequency.value = 880;
-        gain.gain.setValueAtTime(0.0001, at);
-        gain.gain.exponentialRampToValueAtTime(0.3, at + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.15);
-        osc.connect(gain).connect(audio.destination);
-        osc.start(at);
-        osc.stop(at + 0.16);
-    }
+
+// The meow is a recording (public domain, "Meow of a pleading cat" from
+// Wikimedia Commons), loaded once the audio context exists
+let meowBuffer = null;
+let meowLoading = null;
+function loadMeow() {
+    meowLoading ??= fetch('meow.mp3')
+        .then(r => r.arrayBuffer())
+        .then(data => audio.decodeAudioData(data))
+        .then(buffer => { meowBuffer = buffer; })
+        .catch(() => { meowLoading = null; });   // try again next time
+    return meowLoading;
 }
+
+// One note: quick attack, then a fade (or held until the end with sustain)
+function tone(out, { type = 'sine', freq, at, dur, peak = 0.3, sustain = false }) {
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.exponentialRampToValueAtTime(peak, at + 0.02);
+    if (sustain) gain.gain.setValueAtTime(peak, at + dur - 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    osc.connect(gain).connect(out);
+    osc.start(at);
+    osc.stop(at + dur + 0.01);
+    return osc;
+}
+
+// Synthesized alarm sounds: play() plays one round starting at `at`,
+// repeated every `period` seconds while ringing
+const SOUNDS = {
+    beep: {
+        period: 1,
+        play(out, at) {
+            for (let i = 0; i < 3; i++) tone(out, { freq: 880, at: at + i * 0.2, dur: 0.15 });
+        }
+    },
+    chime: {
+        period: 1.6,
+        play(out, at) {
+            tone(out, { freq: 1319, at, dur: 0.8 });
+            tone(out, { freq: 1047, at: at + 0.35, dur: 1.2 });
+        }
+    },
+    siren: {
+        period: 1,
+        play(out, at) {
+            const osc = tone(out, { type: 'sawtooth', freq: 600, at, dur: 0.98, peak: 0.3, sustain: true });
+            osc.frequency.linearRampToValueAtTime(1200, at + 0.5);
+            osc.frequency.linearRampToValueAtTime(600, at + 0.98);
+        }
+    },
+    // Four meows about 3 seconds apart
+    meow: {
+        get period() { return meowBuffer.duration; },
+        play(out, at) {
+            const src = audio.createBufferSource();
+            const gain = audio.createGain();
+            src.buffer = meowBuffer;
+            gain.gain.value = 0.5;
+            src.connect(gain).connect(out);
+            src.start(at);
+        }
+    }
+};
+
+// Play the chosen sound for about `seconds`; returns the output node,
+// disconnect it to stop. Beeps if the meow hasn't loaded.
+function playSound(seconds) {
+    if (!audio) return null;
+    const name = alarm.sound === 'meow' && !meowBuffer ? 'beep' : alarm.sound;
+    const sound = SOUNDS[name] ?? SOUNDS.beep;
+    const out = audio.createGain();
+    out.connect(audio.destination);
+    const start = audio.currentTime + 0.05;
+    for (let t = 0; t < seconds; t += sound.period) sound.play(out, start + t);
+    return out;
+}
+// A few seconds of the chosen sound, e.g. the first meow
+async function previewSound() {
+    unlockAudio();
+    if (alarm.sound === 'meow') await loadMeow();
+    previewOut?.disconnect();
+    const out = previewOut = playSound(0.1);
+    setTimeout(() => out?.disconnect(), 2500);
+}
+
 function startRinging(el) {
     el.classList.add('ringing');
     clearTimeout(el.ringTimeout);
     el.ringTimeout = setTimeout(() => stopRinging(el), 60000);
-    if (!beepTimer) {
-        beep();
-        beepTimer = setInterval(beep, 1000);
-    }
+    ringOut?.disconnect();
+    ringOut = playSound(60);
 }
 function stopRinging(el) {
     el.classList.remove('ringing');
     el.querySelectorAll('.ringing').forEach(row => row.classList.remove('ringing'));
     clearTimeout(el.ringTimeout);
     if (!document.querySelector('.widget.ringing')) {
-        clearInterval(beepTimer);
-        beepTimer = null;
+        ringOut?.disconnect();
+        ringOut = null;
+        notification?.close();
     }
     showAlarm();
 }
@@ -974,6 +1099,26 @@ overlay.addEventListener('click', () => stopRinging(widgetEl('alarm')));
 overlay.addEventListener('keydown', e => {
     if (e.key === 'Escape') stopRinging(widgetEl('alarm'));
 });
+
+// System notification while the page is in the background, so a ringing
+// alarm is seen even with the tab hidden or the browser minimized.
+// Permission is asked for when an alarm is set.
+let notification = null;
+function notify() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    if (document.visibilityState === 'visible') return;
+    notification?.close();
+    notification = new Notification(`⏰ ${$('alarmName').textContent}`,
+        { body: $('alarmTime').textContent, tag: 'alarm', requireInteraction: true });
+    notification.onclick = () => {
+        focus();
+        notification.close();
+    };
+}
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') notification?.close();
+});
+
 const ringable = () => widgets.alarm.on && Object.values(widgets.alarm.alarms).some(a => a.armed);
 document.addEventListener('pointerdown', () => { if (ringable()) unlockAudio(); });
 document.addEventListener('keydown', () => { if (ringable()) unlockAudio(); });
@@ -981,9 +1126,14 @@ document.addEventListener('keydown', () => { if (ringable()) unlockAudio(); });
 // Alarms for the reps' shift: long break, short break and end of shift
 const alarm = widgets.alarm;   // alarms: { long, short, end } each with time ("HH:MM"), armed
 alarm.alarms ??= {};
+alarm.sound ??= 'beep';
+delete alarm.volume;           // removed volume slider
 delete alarm.time;             // from the earlier single alarm
 delete alarm.armed;
-const lastAlarm = {};          // per alarm, date + time it last rang, so it rings once
+function armAlarm() {
+    unlockAudio();
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+}
 document.querySelectorAll('.alarm-row').forEach(row => {
     const a = alarm.alarms[row.dataset.alarm] ??= {};
     const time = row.querySelector('input[type="time"]');
@@ -994,15 +1144,54 @@ document.querySelectorAll('.alarm-row').forEach(row => {
         a.time = time.value;
         a.armed = !!a.time;   // setting a time arms the alarm
         armed.checked = a.armed;
-        if (a.armed) unlockAudio();
+        if (a.armed) armAlarm();
         saveWidgets();
     });
     armed.addEventListener('change', () => {
         a.armed = armed.checked;
-        if (a.armed) unlockAudio();
+        if (a.armed) armAlarm();
         saveWidgets();
     });
 });
+
+// Alarm sound; picking one plays a preview
+$('alarmSound').value = alarm.sound;
+$('alarmSound').addEventListener('change', () => {
+    alarm.sound = $('alarmSound').value;
+    saveWidgets();
+    previewSound();
+});
+
+// Today's date at an "HH:MM" alarm time
+function alarmDate(time, now) {
+    const [h, m] = time.split(':');
+    const d = new Date(now);
+    d.setHours(h, m, 0, 0);
+    return d;
+}
+
+// "Short in 0:42:10": countdown to the closest armed alarm, today or tomorrow
+function updateNextAlarm(now) {
+    let next = null;
+    document.querySelectorAll('.alarm-row').forEach(row => {
+        const a = alarm.alarms[row.dataset.alarm];
+        if (!a.armed) return;
+        const at = alarmDate(a.time, now);
+        if (at <= now) at.setDate(at.getDate() + 1);
+        if (!next || at < next.at) next = { row, at };
+    });
+    $('nextAlarm').hidden = !next;
+    if (!next) return;
+    const t = translations[lang];
+    const s = Math.ceil((next.at - now) / 1000);
+    const pad = n => String(n).padStart(2, '0');
+    const left = s >= 3600
+        ? `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`
+        : `${Math.floor(s / 60)}:${pad(s % 60)}`;
+    $('nextAlarm').innerHTML = '';
+    $('nextAlarm').append(`${t[next.row.querySelector('[data-t]').dataset.t]} ${t.nextIn} `,
+        Object.assign(document.createElement('bdi'), { textContent: left }));
+}
 
 // Sticky note
 const note = $('noteText');
@@ -1032,19 +1221,29 @@ function tick() {
         $('clockDate').textContent = now.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB',
             { weekday: 'long', day: 'numeric', month: 'short' });
     }
-    const today = now.toDateString() + hm;
     if (alarm.on) {
+        // Ring alarms whose time passed since the last check, even if a
+        // throttled background tab skipped that minute; not if it was long ago
+        // (e.g. the computer slept)
+        let rang = false;
         document.querySelectorAll('.alarm-row').forEach(row => {
-            const id = row.dataset.alarm;
-            const a = alarm.alarms[id];
-            if (!a.armed || a.time !== hm || lastAlarm[id] === today) return;
-            lastAlarm[id] = today;
+            const a = alarm.alarms[row.dataset.alarm];
+            if (!a.armed) return;
+            const at = alarmDate(a.time, now);
+            if (at <= lastCheck || at > now || now - at > 5 * 60000) return;
             row.classList.add('ringing');
+            rang = true;
+        });
+        if (rang) {
             startRinging(widgetEl('alarm'));
             showAlarm();
-        });
+            notify();
+        }
+        updateNextAlarm(now);
     }
+    lastCheck = now;
 }
+let lastCheck = new Date();
 setInterval(tick, 250);
 
 for (const name of WIDGETS) if (widgets[name].on) setWidget(name, true);
