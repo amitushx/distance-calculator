@@ -1149,9 +1149,16 @@ function startRinging(el) {
     ringOut?.disconnect();
     ringOut = playSound(60);
 }
+// However it stops (Stop, Esc, the popup, timing out, closing the widget),
+// the alarm that rang is switched off, so it doesn't ring again tomorrow
 function stopRinging(el) {
     el.classList.remove('ringing');
-    el.querySelectorAll('.ringing').forEach(row => row.classList.remove('ringing'));
+    el.querySelectorAll('.alarm-row.ringing').forEach(row => {
+        row.classList.remove('ringing');
+        alarm.alarms[row.dataset.alarm].armed = false;
+        row.querySelector('input[type="checkbox"]').checked = false;
+        saveWidgets();
+    });
     clearTimeout(el.ringTimeout);
     if (!document.querySelector('.widget.ringing')) {
         ringOut?.disconnect();
@@ -1202,7 +1209,7 @@ document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') notification?.close();
 });
 
-const ringable = () => widgets.alarm.on && Object.values(widgets.alarm.alarms).some(a => a.armed);
+const ringable = () => Object.values(widgets.alarm.alarms).some(a => a.armed);
 document.addEventListener('pointerdown', () => { if (ringable()) unlockAudio(); });
 document.addEventListener('keydown', () => { if (ringable()) unlockAudio(); });
 
@@ -1466,26 +1473,24 @@ function tick() {
         $('clockDate').textContent = now.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB',
             { weekday: 'long', day: 'numeric', month: 'short' });
     }
-    if (alarm.on) {
-        // Ring alarms whose time passed since the last check, even if a
-        // throttled background tab skipped that minute; not if it was long ago
-        // (e.g. the computer slept)
-        let rang = false;
-        document.querySelectorAll('.alarm-row').forEach(row => {
-            const a = alarm.alarms[row.dataset.alarm];
-            if (!a.armed) return;
-            const at = alarmDate(a.time, now);
-            if (at <= lastCheck || at > now || now - at > 5 * 60000) return;
-            row.classList.add('ringing');
-            rang = true;
-        });
-        if (rang) {
-            startRinging(widgetEl('alarm'));
-            showAlarm();
-            notify();
-        }
-        updateNextAlarm(now);
+    // Ring alarms whose time passed since the last check, even if a
+    // throttled background tab skipped that minute; not if it was long ago
+    // (e.g. the computer slept). Rings with the widget closed too.
+    let rang = false;
+    document.querySelectorAll('.alarm-row').forEach(row => {
+        const a = alarm.alarms[row.dataset.alarm];
+        if (!a.armed) return;
+        const at = alarmDate(a.time, now);
+        if (at <= lastCheck || at > now || now - at > 5 * 60000) return;
+        row.classList.add('ringing');
+        rang = true;
+    });
+    if (rang) {
+        startRinging(widgetEl('alarm'));
+        showAlarm();
+        notify();
     }
+    updateNextAlarm(now);
     lastCheck = now;
 }
 let lastCheck = new Date();
