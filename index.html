@@ -616,6 +616,7 @@
     <label class="field" id="distanceField">
         <input id="distance" type="number" inputmode="numeric" min="0" placeholder="0" autofocus autocomplete="off">
         <span id="metersLabel"></span>
+        <kbd>D</kbd>
     </label>
 
     <div class="row">
@@ -951,6 +952,10 @@ document.addEventListener('keydown', e => {
         e.preventDefault();
         $('bonus').focus();
         $('bonus').select();
+    } else if (e.code === 'KeyD') {
+        e.preventDefault();
+        $('distance').focus();
+        $('distance').select();
     }
 });
 
