@@ -414,10 +414,19 @@
     .alarm-row { display: contents; }
     .alarm-row span { font-size: 13px; color: var(--muted); }
     .alarm-row.ringing span { color: var(--accent); font-weight: 500; }
-    .alarm-row input[type="time"] {
+    .alarm-row .time {
         font-size: 20px;
         font-weight: 500;
         font-variant-numeric: tabular-nums;
+    }
+    .alarm-row select {
+        font: inherit;
+        color: inherit;
+        background: none;
+        border: none;
+        appearance: none;
+        padding: 0;
+        cursor: pointer;
         color-scheme: var(--scheme);
     }
     #w-note { background: var(--accent-soft); }
@@ -520,17 +529,17 @@
     <div id="alarms">
         <div class="alarm-row" data-alarm="long">
             <span data-t="alarmLong"></span>
-            <input type="time" dir="ltr">
+            <div class="time" dir="ltr"><select class="hh"></select>:<select class="mm"></select></div>
             <label class="switch"><input type="checkbox"><span class="track"></span></label>
         </div>
         <div class="alarm-row" data-alarm="short">
             <span data-t="alarmShort"></span>
-            <input type="time" dir="ltr">
+            <div class="time" dir="ltr"><select class="hh"></select>:<select class="mm"></select></div>
             <label class="switch"><input type="checkbox"><span class="track"></span></label>
         </div>
         <div class="alarm-row" data-alarm="end">
             <span data-t="alarmEnd"></span>
-            <input type="time" dir="ltr">
+            <div class="time" dir="ltr"><select class="hh"></select>:<select class="mm"></select></div>
             <label class="switch"><input type="checkbox"><span class="track"></span></label>
         </div>
     </div>
@@ -914,17 +923,29 @@ delete alarm.armed;
 const lastAlarm = {};          // per alarm, date + time it last rang, so it rings once
 document.querySelectorAll('.alarm-row').forEach(row => {
     const a = alarm.alarms[row.dataset.alarm] ??= {};
-    const time = row.querySelector('input[type="time"]');
+    // 24-hour hour and minute pickers; a native time input follows the
+    // browser's locale and may show AM/PM
+    const hh = row.querySelector('.hh');
+    const mm = row.querySelector('.mm');
     const armed = row.querySelector('input[type="checkbox"]');
-    time.value = a.time || '';
+    const fill = (sel, n) => sel.innerHTML = '<option value="">--</option>' +
+        Array.from({ length: n }, (_, i) => String(i).padStart(2, '0'))
+            .map(v => `<option>${v}</option>`).join('');
+    fill(hh, 24);
+    fill(mm, 60);
+    [hh.value, mm.value] = a.time ? a.time.split(':') : ['', ''];
     armed.checked = !!a.armed;
-    time.addEventListener('change', () => {
-        a.time = time.value;
+    const onChange = e => {
+        if (!e.target.value) hh.value = mm.value = '';     // clearing either clears the time
+        else if (!hh.value || !mm.value) (hh.value ? mm : hh).value = '00';
+        a.time = hh.value ? `${hh.value}:${mm.value}` : '';
         a.armed = !!a.time;   // setting a time arms the alarm
         armed.checked = a.armed;
         if (a.armed) unlockAudio();
         saveWidgets();
-    });
+    };
+    hh.addEventListener('change', onChange);
+    mm.addEventListener('change', onChange);
     armed.addEventListener('change', () => {
         a.armed = armed.checked;
         if (a.armed) unlockAudio();
