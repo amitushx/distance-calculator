@@ -414,19 +414,10 @@
     .alarm-row { display: contents; }
     .alarm-row span { font-size: 13px; color: var(--muted); }
     .alarm-row.ringing span { color: var(--accent); font-weight: 500; }
-    .alarm-row .time {
+    .alarm-row input[type="time"] {
         font-size: 20px;
         font-weight: 500;
         font-variant-numeric: tabular-nums;
-    }
-    .alarm-row select {
-        font: inherit;
-        color: inherit;
-        background: none;
-        border: none;
-        appearance: none;
-        padding: 0;
-        cursor: pointer;
         color-scheme: var(--scheme);
     }
     #w-note { background: var(--accent-soft); }
@@ -459,6 +450,50 @@
     .widget.ringing .stop { display: block; }
     .widget.ringing { border-color: var(--accent); animation: ring 1s infinite; }
     @keyframes ring { 50% { background: var(--accent-soft); } }
+
+    /* Full-screen popup while an alarm rings; a click anywhere stops it */
+    #alarmOverlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2vh;
+        padding: 16px;
+        background: var(--accent);
+        color: var(--card);
+        text-align: center;
+        cursor: pointer;
+        animation: flash 1s steps(1) infinite;
+    }
+    #alarmOverlay[hidden] { display: none; }
+    @keyframes flash { 50% { background: var(--text); } }
+    @media (prefers-reduced-motion: reduce) { #alarmOverlay { animation: none; } }
+    #alarmName {
+        font-size: clamp(56px, 16vw, 200px);
+        font-weight: 700;
+        line-height: 1;
+    }
+    #alarmTime {
+        font-size: clamp(40px, 11vw, 140px);
+        font-weight: 500;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+    #alarmStop {
+        margin-top: 4vh;
+        padding: 14px 56px;
+        border: 3px solid currentColor;
+        border-radius: 999px;
+        background: none;
+        color: inherit;
+        font: inherit;
+        font-size: 28px;
+        font-weight: 700;
+        cursor: pointer;
+    }
 
     kbd {
         padding: 1px 5px;
@@ -529,21 +564,26 @@
     <div id="alarms">
         <div class="alarm-row" data-alarm="long">
             <span data-t="alarmLong"></span>
-            <div class="time" dir="ltr"><select class="hh"></select>:<select class="mm"></select></div>
+            <input type="time" dir="ltr">
             <label class="switch"><input type="checkbox"><span class="track"></span></label>
         </div>
         <div class="alarm-row" data-alarm="short">
             <span data-t="alarmShort"></span>
-            <div class="time" dir="ltr"><select class="hh"></select>:<select class="mm"></select></div>
+            <input type="time" dir="ltr">
             <label class="switch"><input type="checkbox"><span class="track"></span></label>
         </div>
         <div class="alarm-row" data-alarm="end">
             <span data-t="alarmEnd"></span>
-            <div class="time" dir="ltr"><select class="hh"></select>:<select class="mm"></select></div>
+            <input type="time" dir="ltr">
             <label class="switch"><input type="checkbox"><span class="track"></span></label>
         </div>
     </div>
     <button class="stop" type="button" data-t="stop"></button>
+</div>
+<div id="alarmOverlay" role="alertdialog" aria-labelledby="alarmName" hidden>
+    <div id="alarmName"></div>
+    <div id="alarmTime" dir="ltr"></div>
+    <button id="alarmStop" type="button" data-t="stop"></button>
 </div>
 <div class="widget" id="w-note" hidden>
     <div class="widget-bar"><span data-t="note"></span><button class="close" type="button">×</button></div>
@@ -777,7 +817,7 @@ document.addEventListener('keydown', e => {
         closeMenus();
     }
     // Let widgets (e.g. the note) take typing without triggering shortcuts
-    if (e.target.closest('.widget, .menu')) return;
+    if (e.target.closest('.widget, .menu, #alarmOverlay')) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -910,7 +950,30 @@ function stopRinging(el) {
         clearInterval(beepTimer);
         beepTimer = null;
     }
+    showAlarm();
 }
+
+// Full-screen popup naming the ringing alarm(s) and their time; hidden
+// once nothing rings
+const overlay = $('alarmOverlay');
+function showAlarm() {
+    const rows = [...document.querySelectorAll('.alarm-row.ringing')];
+    if (!rows.length) {
+        overlay.hidden = true;
+        return;
+    }
+    const t = translations[lang];
+    $('alarmName').textContent = rows.map(row => t[row.querySelector('[data-t]').dataset.t]).join(' · ');
+    $('alarmTime').textContent = widgets.alarm.alarms[rows[0].dataset.alarm].time;
+    if (overlay.hidden) {
+        overlay.hidden = false;
+        $('alarmStop').focus();
+    }
+}
+overlay.addEventListener('click', () => stopRinging(widgetEl('alarm')));
+overlay.addEventListener('keydown', e => {
+    if (e.key === 'Escape') stopRinging(widgetEl('alarm'));
+});
 const ringable = () => widgets.alarm.on && Object.values(widgets.alarm.alarms).some(a => a.armed);
 document.addEventListener('pointerdown', () => { if (ringable()) unlockAudio(); });
 document.addEventListener('keydown', () => { if (ringable()) unlockAudio(); });
@@ -923,29 +986,17 @@ delete alarm.armed;
 const lastAlarm = {};          // per alarm, date + time it last rang, so it rings once
 document.querySelectorAll('.alarm-row').forEach(row => {
     const a = alarm.alarms[row.dataset.alarm] ??= {};
-    // 24-hour hour and minute pickers; a native time input follows the
-    // browser's locale and may show AM/PM
-    const hh = row.querySelector('.hh');
-    const mm = row.querySelector('.mm');
+    const time = row.querySelector('input[type="time"]');
     const armed = row.querySelector('input[type="checkbox"]');
-    const fill = (sel, n) => sel.innerHTML = '<option value="">--</option>' +
-        Array.from({ length: n }, (_, i) => String(i).padStart(2, '0'))
-            .map(v => `<option>${v}</option>`).join('');
-    fill(hh, 24);
-    fill(mm, 60);
-    [hh.value, mm.value] = a.time ? a.time.split(':') : ['', ''];
+    time.value = a.time || '';
     armed.checked = !!a.armed;
-    const onChange = e => {
-        if (!e.target.value) hh.value = mm.value = '';     // clearing either clears the time
-        else if (!hh.value || !mm.value) (hh.value ? mm : hh).value = '00';
-        a.time = hh.value ? `${hh.value}:${mm.value}` : '';
+    time.addEventListener('change', () => {
+        a.time = time.value;
         a.armed = !!a.time;   // setting a time arms the alarm
         armed.checked = a.armed;
         if (a.armed) unlockAudio();
         saveWidgets();
-    };
-    hh.addEventListener('change', onChange);
-    mm.addEventListener('change', onChange);
+    });
     armed.addEventListener('change', () => {
         a.armed = armed.checked;
         if (a.armed) unlockAudio();
@@ -990,6 +1041,7 @@ function tick() {
             lastAlarm[id] = today;
             row.classList.add('ringing');
             startRinging(widgetEl('alarm'));
+            showAlarm();
         });
     }
 }
