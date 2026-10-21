@@ -512,6 +512,73 @@
         cursor: pointer;
     }
 
+    /*
+     * Angry courier in the bottom-left corner: hidden below the edge, he
+     * now and then pops his head up (.peek), and comes all the way out
+     * while hovered (.out). Springs up, sinks back down.
+     */
+    #courier {
+        position: fixed;
+        left: 16px;
+        bottom: 0;
+        z-index: 5;
+        user-select: none;
+        transform: translateY(calc(100% + 12px));   /* clear of the bob and sway */
+        transition: transform .5s cubic-bezier(.5, 0, .75, 0);
+    }
+    #courier.peek { transform: translateY(calc(100% - var(--peek))); }
+    #courier.out { transform: none; }
+    #courier.peek, #courier.out { transition: transform .7s cubic-bezier(.34, 1.56, .64, 1); }
+    #courier .bob {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: bob 1.2s ease-in-out infinite;
+    }
+    #courier .sign {
+        padding: 8px 12px 10px;
+        border: 4px solid #1b1b1b;
+        background: #f3d9a4;
+        transform-origin: 50% 100%;
+        animation: sway 2.4s ease-in-out infinite;
+    }
+    #courier canvas { display: block; image-rendering: pixelated; }
+    /* Overlaps the sign so his hands grip its bottom edge */
+    #courierSprite {
+        position: relative;
+        width: 104px;
+        height: 140px;
+        margin-top: -12px;
+    }
+    /* Steam rising off his cap */
+    #courier .puff {
+        position: absolute;
+        bottom: 104px;
+        left: calc(50% - 22px);
+        width: 8px;
+        height: 8px;
+        background: #a8a8a8;
+        opacity: 0;
+        --dx: -8px;
+        animation: puff 1.6s ease-out infinite;
+    }
+    #courier .puff + .puff { left: calc(50% + 14px); --dx: 8px; animation-delay: .8s; }
+    #courier:not(.peek, .out) * { animation-play-state: paused; }
+    @keyframes bob { 50% { transform: translateY(-5px); } }
+    @keyframes sway {
+        0%, 100% { transform: rotate(-2deg); }
+        50% { transform: rotate(2deg); }
+    }
+    @keyframes puff {
+        0% { opacity: .9; transform: none; }
+        100% { opacity: 0; transform: translate(var(--dx), -16px) scale(.4); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        #courier, #courier.peek, #courier.out { transition: none; }
+        #courier * { animation: none !important; }
+    }
+
     kbd {
         padding: 1px 5px;
         border: 1px solid currentColor;
@@ -571,6 +638,13 @@
     </button>
 </main>
 <footer id="credit"></footer>
+<div id="courier" aria-hidden="true">
+    <div class="bob">
+        <div class="sign"><canvas id="courierSign"></canvas></div>
+        <canvas id="courierSprite" width="26" height="35"></canvas>
+        <i class="puff"></i><i class="puff"></i>
+    </div>
+</div>
 
 <div class="widget" id="w-clock" hidden>
     <div class="widget-bar"><span data-t="clock"></span><button class="close" type="button">×</button></div>
@@ -641,6 +715,7 @@ const translations = {
         widgets: 'ווידג׳טים',
         clock: 'שעון',
         alarm: 'שעון מעורר',
+        courierSign: 'פיצוי\nהגעה!!!',
         alarmLong: 'ארוכה',
         alarmShort: 'קצרה',
         alarmEnd: 'ירידה',
@@ -676,6 +751,7 @@ const translations = {
         widgets: 'Widgets',
         clock: 'Clock',
         alarm: 'Alarms',
+        courierSign: 'ARRIVAL\nCOMPENSATION!!!',
         alarmLong: 'Long',
         alarmShort: 'Short',
         alarmEnd: 'Ending',
@@ -1192,6 +1268,168 @@ function updateNextAlarm(now) {
     $('nextAlarm').append(`${t[next.row.querySelector('[data-t]').dataset.t]} ${t.nextIn} `,
         Object.assign(document.createElement('bdi'), { textContent: left }));
 }
+
+// Angry courier: pixel art, one character per pixel (see COURIER_COLORS).
+// The motion is CSS; the frames only switch his mouth between gritted
+// teeth and shouting.
+const COURIER_COLORS = {
+    K: '#1b1b1b',   // outline
+    B: '#009de0',   // jacket and cap
+    D: '#0077b3',   // shading, straps
+    S: '#f1c27d',   // skin
+    R: '#d63a2f',   // flushed cheeks, mouth
+    P: '#34495e',   // pants
+    O: '#3b3b3b'    // shoes
+};
+const COURIER = [
+    '.KKKK................KKKK.',
+    'KSSSSK..............KSSSSK',
+    'KSSSSK..............KSSSSK',
+    '.KBBK................KBBK.',
+    '.KBBK................KBBK.',
+    '..KBBK..............KBBK..',
+    '..KBBK..............KBBK..',
+    '...KBBK............KBBK...',
+    '...KBBK...KKKKKK...KBBK...',
+    '....KBBK.KBBBBBBK.KBBK....',
+    '....KBBKKBBBBBBBBKKBBK....',
+    '....KBBKKDDDDDDDDKKBBK....',
+    '....KBBKKKSSSSSSKKKBBK....',   // angry brows
+    '....KBBKKSKKSSKKSKKBBK....',
+    '....KBBKKSSKSSKSSKKBBK....',   // eyes
+    '....KBBKKRSSSSSSRKKBBK....',
+    '....KBBKKSSKKKKSSKKBBK....',   // gritted teeth
+    '....KBBK.KSSSSSSK.KBBK....',
+    '....KBBK..KKKKKK..KBBK....',
+    '...KBBBBBBBBBBBBBBBBBBK...',
+    '..KBBBBBBBBBBBBBBBBBBBBK..',
+    '.KBBBBBBBBBBBBBBBBBBBBBBK.',
+    '.KDBBBBBBBBBBBBBBBBBBBBDK.',
+    'KDBBBBBBBBBBBBBBBBBBBBBBDK',
+    'KDBBBBBBBBBBBBBBBBBBBBBBDK',
+    'KDBBBBBBBBBBBBBBBBBBBBBBDK',
+    'KDBBBBBBBBBBBBBBBBBBBBBBDK',
+    '.KDBBBBBBBBBBBBBBBBBBBBDK.',
+    '.KDDBBBBBBBBBBBBBBBBBBDDK.',
+    '..KDDBBBBBBBBBBBBBBBBDDK..',
+    '...KKDDDDDDDDDDDDDDDDKK...',
+    '.....KKKKKKKKKKKKKKKK.....',
+    '......KPPK......KPPK......',
+    '.....KOOOK......KOOOK.....',
+    '.....KKKKK......KKKKK.....'
+];
+const COURIER_HEAD_ROWS = 19;   // rows down to his chin, shown when peeking
+const COURIER_FRAMES = [
+    COURIER,
+    COURIER.map((row, y) => ({
+        16: '....KBBKKSKRRRRKSKKBBK....',   // shouting
+        17: '....KBBK.KSKKKKSK.KBBK....'
+    })[y] ?? row)
+];
+const courier = $('courier');
+const courierCtx = $('courierSprite').getContext('2d');
+let courierStep = 0;
+function drawCourier() {
+    courierCtx.clearRect(0, 0, 26, 35);
+    COURIER_FRAMES[courierStep % 2].forEach((row, y) => {
+        [...row].forEach((ch, x) => {
+            if (!COURIER_COLORS[ch]) return;
+            courierCtx.fillStyle = COURIER_COLORS[ch];
+            courierCtx.fillRect(x, y, 1, 1);
+        });
+    });
+}
+drawCourier();
+setInterval(() => {
+    if (!courier.matches('.peek, .out') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    courierStep++;
+    drawCourier();
+}, 450);
+
+// The sign's text in a 5×7 pixel font, drawn at 2× to match the sprite.
+// Only the letters the sign uses, in both languages.
+const GLYPHS = {
+    A: ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+    C: ['.###.', '#...#', '#....', '#....', '#....', '#...#', '.###.'],
+    E: ['#####', '#....', '#....', '####.', '#....', '#....', '#####'],
+    I: ['###', '.#.', '.#.', '.#.', '.#.', '.#.', '###'],
+    L: ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
+    M: ['#...#', '##.##', '#.#.#', '#.#.#', '#...#', '#...#', '#...#'],
+    N: ['#...#', '##..#', '#.#.#', '#..##', '#...#', '#...#', '#...#'],
+    O: ['.###.', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+    P: ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
+    R: ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'],
+    S: ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
+    T: ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
+    V: ['#...#', '#...#', '#...#', '#...#', '#...#', '.#.#.', '..#..'],
+    '!': ['#', '#', '#', '#', '#', '.', '#'],
+    'ג': ['###', '..#', '..#', '..#', '.##', '#.#', '#.#'],
+    'ה': ['#####', '....#', '#...#', '#...#', '#...#', '#...#', '#...#'],
+    'ו': ['##', '.#', '.#', '.#', '.#', '.#', '.#'],
+    'י': ['##', '.#', '.#', '..', '..', '..', '..'],
+    'ע': ['#...#', '#...#', '#...#', '.#..#', '..###', '...#.', '###..'],
+    'פ': ['#####', '#...#', '##..#', '....#', '....#', '....#', '#####'],
+    'צ': ['#...#', '#...#', '.#.#.', '..#..', '...#.', '....#', '#####']
+};
+function drawSign() {
+    // Hebrew is drawn right to left, so reverse each line
+    const lines = translations[lang].courierSign.split('\n')
+        .map(line => lang === 'he' ? [...line].reverse() : [...line]);
+    const width = line => line.reduce((w, ch) => w + GLYPHS[ch][0].length + 1, -1);
+    const canvas = $('courierSign');
+    canvas.width = Math.max(...lines.map(width));
+    canvas.height = lines.length * 10 - 3;
+    canvas.style.width = canvas.width * 2 + 'px';
+    canvas.style.height = canvas.height * 2 + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#c0392b';
+    lines.forEach((line, i) => {
+        let x = Math.floor((canvas.width - width(line)) / 2);   // centered
+        for (const ch of line) {
+            GLYPHS[ch].forEach((row, y) => [...row].forEach((px, dx) => {
+                if (px === '#') ctx.fillRect(x + dx, i * 10 + y, 1, 1);
+            }));
+            x += GLYPHS[ch][0].length + 1;
+        }
+    });
+}
+drawSign();
+$('lang').addEventListener('click', drawSign);
+
+// He visits at random every hour or two, pops his head up for a few
+// seconds and sinks back. Hovering brings him all the way out.
+let courierVisit = null;
+let courierHide = null;
+function scheduleCourier() {
+    clearTimeout(courierVisit);
+    courierVisit = setTimeout(peekCourier, (60 + Math.random() * 60) * 60000);
+}
+function peekCourier() {
+    if (document.visibilityState !== 'visible') {   // wait until he'd be seen
+        document.addEventListener('visibilitychange', peekCourier, { once: true });
+        return;
+    }
+    const sign = courier.querySelector('.sign');
+    courier.style.setProperty('--peek', `${sign.offsetHeight - 12 + COURIER_HEAD_ROWS * 4}px`);
+    courier.classList.add('peek');
+    clearTimeout(courierHide);
+    courierHide = setTimeout(hideCourier, 8000);
+}
+function hideCourier() {
+    courier.classList.remove('peek', 'out');
+    scheduleCourier();
+}
+courier.addEventListener('pointerenter', () => {
+    if (!courier.matches('.peek, .out')) return;
+    clearTimeout(courierHide);
+    courier.classList.add('out');
+});
+courier.addEventListener('pointerleave', () => {
+    if (!courier.matches('.peek, .out')) return;
+    clearTimeout(courierHide);
+    courierHide = setTimeout(hideCourier, 3000);
+});
+scheduleCourier();
 
 // Sticky note
 const note = $('noteText');
