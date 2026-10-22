@@ -45,8 +45,12 @@ const cityKey = name => name.replace(/[\s\-״"'׳]/g, '');
 // Returns [{ name, slots: [{ from, to, percent }] }] sorted by city name;
 // from/to are minutes since midnight, to is exclusive.
 function parseBonusList(text) {
-    // Some lists run bonuses and the next city together on one line
     const lines = text
+        // Slack writes emojis as :name: ("14:00:ocean:"); turn them into a
+        // symbol so they read like any emoji. A name starts with a letter, so
+        // the ":00-14:" inside a time range isn't taken for one.
+        .replace(/:[a-z][a-z0-9_+\-']*:/gi, '•')
+        // Some lists run bonuses and the next city together on one line
         .replace(new RegExp(`(${RANGE})(?=[^\\s)])`, 'g'), '$1\n')
         .split(/\r?\n/);
     const cities = new Map();

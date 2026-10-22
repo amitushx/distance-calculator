@@ -233,6 +233,15 @@ const COUNTS = [
 
 const results = [];
 const check = (ok, text) => results.push({ ok, text });
+// The same lists copied from Slack, where emojis become :name: shortcodes;
+// every check runs on these too
+for (const [list, text] of Object.entries(LISTS)) {
+    LISTS[list + 'Slack'] = text.replace(/\p{Extended_Pictographic}️?/gu, ':palm_tree:');
+}
+for (const rows of [COUNTS, CASES]) {
+    rows.push(...rows.map(([list, ...rest]) => [list + 'Slack', ...rest]));
+}
+
 const parsed = Object.fromEntries(Object.entries(LISTS).map(([k, v]) => [k, parseBonusList(v)]));
 
 for (const [list, cities, slots] of COUNTS) {
