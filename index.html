@@ -614,6 +614,69 @@
         transform: translateX(-100%);
     }
 
+    /* Help: a button in the page's top-right corner opening a how-to dialog */
+    #helpBtn {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        z-index: 50;
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: none;
+        color: var(--muted);
+        cursor: pointer;
+        transition: color .15s;
+    }
+    #helpBtn:hover { color: var(--accent); }
+    #helpBtn:focus-visible { outline: 2px solid var(--accent); }
+    @media (max-width: 480px) { body { padding-top: 52px; } }
+    #help {
+        width: min(440px, calc(100vw - 32px));
+        max-height: calc(100vh - 32px);
+        margin: auto;   /* the reset above removes the dialog's centering */
+        overflow: auto;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--card);
+        color: var(--text);
+        box-shadow: var(--shadow);
+    }
+    #help::backdrop { background: rgba(0, 0, 0, .35); }
+    .help-inner { padding: 22px 24px 24px; }
+    .help-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+    #helpTitle { font-size: 18px; font-weight: 700; }
+    #helpClose {
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+    }
+    #helpClose:hover { color: var(--text); }
+    .help-body h3 {
+        margin-top: 18px;
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .help-body ul { margin-top: 6px; padding-inline-start: 18px; }
+    .help-body li { margin-top: 5px; font-size: 14px; line-height: 1.5; }
+    .help-body li::marker { color: var(--muted); }
+
     kbd {
         padding: 1px 5px;
         border: 1px solid currentColor;
@@ -682,6 +745,66 @@
 </main>
 <footer id="credit"></footer>
 <div id="road" aria-hidden="true" hidden><canvas id="courier"></canvas></div>
+
+<button id="helpBtn" type="button" aria-haspopup="dialog">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 11v6M12 7.5h.01"/></svg>
+</button>
+<dialog id="help" aria-labelledby="helpTitle">
+    <div class="help-inner">
+        <div class="help-head">
+            <h2 id="helpTitle"></h2>
+            <button id="helpClose" type="button">×</button>
+        </div>
+        <div class="help-body" lang="he">
+            <h3>🧮 המחשבון</h3>
+            <ul>
+                <li>הקלידו את המרחק במטרים, והתשלום יופיע למטה, מעוגל כלפי מעלה לשקל שלם.</li>
+                <li>הוסיפו אחוז בונוס אם יש, והפעילו <b>ווקר</b> לשליחים רגליים.</li>
+                <li>לחיצה על הסכום או <kbd>Enter</kbd> מעתיקים אותו, ו־<kbd>Esc</kbd> מנקה.</li>
+                <li>קיצורים: <kbd>D</kbd> מרחק, <kbd>B</kbd> בונוס, <kbd>W</kbd> ווקר.</li>
+            </ul>
+            <h3>📋 רשימת הבונוסים</h3>
+            <ul>
+                <li>העתיקו את הודעת הבונוסים של היום, ולחצו על 📋 כדי להדביק אותה.</li>
+                <li>בחרו את העיר שלכם, והבונוס יתעדכן לבד לפי השעה, עם עד מתי הוא בתוקף.</li>
+                <li>הרשימה נשמרת עד סוף היום, והעיר נשמרת גם למחר. הקלדת בונוס או בחירה ב״בונוס ידני״ מחזירות לבונוס הידני.</li>
+            </ul>
+            <h3>🧩 ווידג׳טים</h3>
+            <ul>
+                <li>מהכפתור 🧩 מפעילים שעון, שעון מעורר, פתק ושמיים. גררו אותם לאן שנוח, והם יישארו שם.</li>
+                <li>בשעון המעורר קובעים שעה להפסקה ארוכה, להפסקה קצרה ולירידה מהמשמרת, ובוחרים צליל. כשהוא מצלצל, לחיצה או <kbd>Esc</kbd> עוצרים אותו.</li>
+            </ul>
+            <h3>🎨 ערכות צבעים</h3>
+            <ul>
+                <li>🎨 בוחר ערכת צבעים, 🌙/☀️ עובר בין מצב בהיר לכהה, וכפתור השפה עובר בין עברית לאנגלית.</li>
+            </ul>
+        </div>
+        <div class="help-body" lang="en">
+            <h3>🧮 The calculator</h3>
+            <ul>
+                <li>Type the distance in meters and the payment shows below, rounded up to a whole shekel.</li>
+                <li>Add a bonus percentage if there is one, and turn on <b>Walker</b> for couriers on foot.</li>
+                <li>Click the amount or press <kbd>Enter</kbd> to copy it; <kbd>Esc</kbd> clears.</li>
+                <li>Shortcuts: <kbd>D</kbd> distance, <kbd>B</kbd> bonus, <kbd>W</kbd> walker.</li>
+            </ul>
+            <h3>📋 The bonus list</h3>
+            <ul>
+                <li>Copy the day's bonus message, then press 📋 to paste it.</li>
+                <li>Pick your city and the bonus follows the clock by itself, showing until when it holds.</li>
+                <li>The list is kept until the end of the day, and your city is remembered for tomorrow. Typing a bonus or picking “Manual bonus” switches back to your own bonus.</li>
+            </ul>
+            <h3>🧩 Widgets</h3>
+            <ul>
+                <li>The 🧩 button turns on a clock, alarms, a note and the sky. Drag them anywhere and they stay put.</li>
+                <li>Set alarms for the long break, the short break and the end of the shift, and pick a sound. When one rings, click or press <kbd>Esc</kbd> to stop it.</li>
+            </ul>
+            <h3>🎨 Themes</h3>
+            <ul>
+                <li>🎨 picks a color theme, 🌙/☀️ switches between light and dark, and the language button switches between Hebrew and English.</li>
+            </ul>
+        </div>
+    </div>
+</dialog>
 
 <div class="widget" id="w-clock" hidden>
     <div class="widget-bar"><span data-t="clock"></span><button class="close" type="button">×</button></div>
@@ -777,6 +900,8 @@ const translations = {
         notePlaceholder: 'כתבו משהו…',
         close: 'סגירה',
         stop: 'עצירה',
+        help: 'עזרה',
+        helpTitle: 'איך משתמשים',
         otherLang: 'English'
     },
     en: {
@@ -820,6 +945,8 @@ const translations = {
         notePlaceholder: 'Write something…',
         close: 'Close',
         stop: 'Stop',
+        help: 'Help',
+        helpTitle: 'How to use',
         otherLang: 'עברית'
     }
 };
@@ -849,6 +976,11 @@ function applyLanguage() {
     $('credit').textContent = t.credit;
     $('paletteBtn').title = t.palette;
     $('bonusPasteBtn').title = t.pasteList;
+    $('helpBtn').title = t.help;
+    $('helpBtn').setAttribute('aria-label', t.help);
+    $('helpTitle').textContent = t.helpTitle;
+    $('helpClose').title = t.close;
+    document.querySelectorAll('.help-body').forEach(el => { el.hidden = el.lang !== lang; });
     translateWidgets();
     updateThemeButton();
     fillCitySelect();
@@ -984,7 +1116,18 @@ $('lang').addEventListener('click', () => {
     applyLanguage();
 });
 
+// Help dialog; closes with ×, Escape or a click outside it
+$('helpBtn').addEventListener('click', () => {
+    closeMenus();
+    $('help').showModal();
+});
+$('helpClose').addEventListener('click', () => $('help').close());
+$('help').addEventListener('click', e => { if (e.target === $('help')) $('help').close(); });
+$('help').addEventListener('close', () => $('distance').focus());
+
 document.addEventListener('keydown', e => {
+    // The dialog handles its own keys (Escape closes it)
+    if (e.target.closest('#help')) return;
     if (e.key === 'Escape') {
         // Escape first stops an alarm or closes a menu; otherwise it clears
         const busy = document.querySelector('.widget.ringing, .menu:not([hidden])');
