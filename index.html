@@ -343,78 +343,36 @@
         gap: 16px;
         margin-top: 20px;
     }
-    .bonus-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
     #bonusField { width: 150px; min-width: 0; }
     #bonusField input { font-size: 18px; }
-    #bonusListBtn {
-        padding: 0;
-        border: none;
-        background: none;
-        font-size: 16px;
-        cursor: pointer;
-        opacity: .5;
-        filter: grayscale(1);
-        transition: opacity .15s, filter .15s;
-    }
-    #bonusListBtn:hover, #bonusListBtn.active,
-    #bonusListBtn[aria-expanded="true"] { opacity: 1; filter: none; }
-    #bonusNow {
-        display: block;
-        margin-top: 10px;
-        padding: 0;
-        border: none;
-        background: none;
-        color: var(--accent);
-        font: inherit;
-        font-size: 13px;
-        text-align: start;
-        cursor: pointer;
-    }
-    #bonusNow[hidden], #bonusPanel[hidden] { display: none; }
-    #bonusPanel {
-        display: grid;
-        gap: 10px;
-        margin-top: 14px;
-        padding: 12px;
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        font-size: 13px;
-    }
-    #bonusCity, #bonusPaste {
-        width: 100%;
+    .bonus-pick { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+    #bonusCity {
+        flex: 1;
+        min-width: 0;
         padding: 6px 8px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--card);
         color: var(--text);
         font: inherit;
+        font-size: 15px;
+        cursor: pointer;
         color-scheme: var(--scheme);
     }
-    #bonusCity { font-size: 15px; cursor: pointer; }
-    #bonusPaste { height: 64px; font-size: 12px; resize: vertical; }
-    #bonusPaste:focus, #bonusCity:focus { outline: none; border-color: var(--accent); }
-    #bonusSlots {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px 10px;
-        padding: 0;
-        list-style: none;
-        color: var(--muted);
-        font-variant-numeric: tabular-nums;
-    }
-    #bonusSlots:empty { display: none; }
-    #bonusSlots .now { color: var(--accent); font-weight: 500; }
-    .bonus-foot { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); }
-    #bonusClear {
+    #bonusCity:focus { outline: none; border-color: var(--accent); }
+    #bonusPasteBtn {
         padding: 0;
         border: none;
         background: none;
-        color: var(--muted);
-        font: inherit;
-        text-decoration: underline;
+        font-size: 18px;
         cursor: pointer;
+        opacity: .5;
+        filter: grayscale(1);
+        transition: opacity .15s, filter .15s;
     }
-    #bonusClear:hover { color: var(--text); }
+    #bonusPasteBtn:hover, #bonusPasteBtn.active { opacity: 1; filter: none; }
+    #bonusInfo { min-height: 1.4em; margin-top: 6px; color: var(--accent); font-size: 13px; }
+    #bonusInfo.note { color: var(--muted); }
 
     .switch {
         display: flex;
@@ -699,14 +657,11 @@
     </label>
 
     <div class="row">
-        <div class="bonus-group">
-            <label class="field" id="bonusField">
-                <input id="bonus" type="number" inputmode="decimal" min="0" placeholder="0" autocomplete="off">
-                <span id="bonusLabel"></span>
-                <kbd>B</kbd>
-            </label>
-            <button id="bonusListBtn" type="button" aria-expanded="false" aria-controls="bonusPanel">📋</button>
-        </div>
+        <label class="field" id="bonusField">
+            <input id="bonus" type="number" inputmode="decimal" min="0" placeholder="0" autocomplete="off">
+            <span id="bonusLabel"></span>
+            <kbd>B</kbd>
+        </label>
         <label class="switch">
             <input id="walker" type="checkbox">
             <span class="track"></span>
@@ -714,16 +669,11 @@
             <kbd>W</kbd>
         </label>
     </div>
-    <button id="bonusNow" type="button" hidden></button>
-    <div id="bonusPanel" hidden>
-        <select id="bonusCity" hidden></select>
-        <ul id="bonusSlots"></ul>
-        <textarea id="bonusPaste" dir="auto" spellcheck="false"></textarea>
-        <div class="bonus-foot">
-            <span id="bonusStatus"></span>
-            <button id="bonusClear" type="button" data-t="clearList" hidden></button>
-        </div>
+    <div class="bonus-pick">
+        <select id="bonusCity"></select>
+        <button id="bonusPasteBtn" type="button">📋</button>
     </div>
+    <div id="bonusInfo" aria-live="polite"></div>
 
     <button id="result" type="button" disabled>
         <span id="amount" dir="ltr">—</span>
@@ -790,12 +740,11 @@ const translations = {
         title: 'מחשבון מרחק',
         meters: 'מטרים',
         bonus: '% בונוס',
-        bonusList: 'רשימת בונוסים יומית',
-        pasteList: 'הדביקו כאן את רשימת הבונוסים של היום',
+        pasteList: 'הדבקת רשימת הבונוסים שהועתקה',
+        pastePrompt: 'הדביקו את רשימת הבונוסים:',
         manualBonus: 'בונוס ידני',
         citiesFound: n => `נמצאו ${n} ערים · תקף עד סוף היום`,
-        noBonuses: 'לא נמצאו בונוסים בטקסט',
-        clearList: 'ניקוי',
+        noBonuses: 'לא נמצאה רשימת בונוסים בטקסט שהועתק',
         until: 'עד',
         walker: 'ווקר',
         hint: '<kbd>Enter</kbd> או לחיצה להעתקה · <kbd>Esc</kbd> לניקוי',
@@ -834,12 +783,11 @@ const translations = {
         title: 'Distance Calculator',
         meters: 'meters',
         bonus: '% bonus',
-        bonusList: "Today's bonus list",
-        pasteList: "Paste today's bonus list here",
+        pasteList: 'Paste the copied bonus list',
+        pastePrompt: 'Paste the bonus list:',
         manualBonus: 'Manual bonus',
         citiesFound: n => `${n} cities found · valid until end of day`,
-        noBonuses: 'No bonuses found in the text',
-        clearList: 'Clear',
+        noBonuses: 'No bonus list found in the copied text',
         until: 'until',
         walker: 'Walker',
         hint: '<kbd>Enter</kbd> or click to copy · <kbd>Esc</kbd> to clear',
@@ -900,8 +848,7 @@ function applyLanguage() {
     $('walkerLabel').textContent = t.walker;
     $('credit').textContent = t.credit;
     $('paletteBtn').title = t.palette;
-    $('bonusListBtn').title = t.bonusList;
-    $('bonusPaste').placeholder = t.pasteList;
+    $('bonusPasteBtn').title = t.pasteList;
     translateWidgets();
     updateThemeButton();
     fillCitySelect();
@@ -1040,14 +987,13 @@ $('lang').addEventListener('click', () => {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         // Escape first stops an alarm or closes a menu; otherwise it clears
-        const busy = document.querySelector('.widget.ringing, .menu:not([hidden]), #bonusPanel:not([hidden])');
+        const busy = document.querySelector('.widget.ringing, .menu:not([hidden])');
         document.querySelectorAll('.widget.ringing').forEach(stopRinging);
         closeMenus();
-        showBonusPanel(false);
         if (busy) return;
     }
     // Let widgets (e.g. the note) take typing without triggering shortcuts
-    if (e.target.closest('.widget, .menu, #alarmOverlay, #bonusPanel')) return;
+    if (e.target.closest('.widget, .menu, #alarmOverlay')) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -1683,12 +1629,14 @@ setInterval(tick, 250);
 
 for (const name of WIDGETS) if (widgets[name].on) setWidget(name, true);
 
-// Daily bonus list (bonus.js): paste the day's list and pick a city, and the
-// bonus follows the clock. The list is kept until the end of the day it was
-// pasted on and the city is remembered across days. Typing a bonus switches
-// back to it; the typed bonus is kept apart and comes back afterwards.
+// Daily bonus list (bonus.js): copy the day's list, paste it with the
+// button and pick a city, and the bonus follows the clock. The list is kept
+// until the end of the day it was pasted on and the city is remembered
+// across days. Typing a bonus switches back to it; the typed bonus is kept
+// apart and comes back afterwards.
 let bonusList = null;                       // { date, text, cities } or null
 let bonusCity = store.get('bonusCity');     // chosen city name, or null
+let bonusNoteTimer = null;                  // a short message is showing
 const todayKey = () => new Date().toLocaleDateString('en-CA');
 const nowMinute = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
 const listCity = () => bonusList && bonusCity &&
@@ -1698,22 +1646,46 @@ try {
     if (saved?.date === todayKey()) bonusList = { ...saved, cities: parseBonusList(saved.text) };
 } catch {}
 
-function setBonusList(text) {
+// Read the copied list; a text that isn't one keeps the current list
+async function pasteBonusList() {
+    const t = translations[lang];
+    let text;
+    try {
+        text = await navigator.clipboard.readText();
+    } catch {
+        // No clipboard access (old browser, permission denied): ask instead
+        text = prompt(t.pastePrompt);
+        if (text === null) return;
+    }
     const cities = parseBonusList(text);
-    bonusList = cities.length ? { date: todayKey(), text, cities } : null;
-    store.set('bonusList', bonusList ? JSON.stringify({ date: bonusList.date, text }) : '');
-    fillCitySelect();
+    if (cities.length) {
+        bonusList = { date: todayKey(), text, cities };
+        store.set('bonusList', JSON.stringify({ date: bonusList.date, text }));
+        fillCitySelect();
+    }
+    showBonusNote(cities.length ? t.citiesFound(cities.length) : t.noBonuses);
+}
+
+function showBonusNote(text) {
+    clearBonusNote();
+    $('bonusInfo').textContent = text;
+    $('bonusInfo').classList.add('note');
+    bonusNoteTimer = setTimeout(() => {
+        clearBonusNote();
+        updateBonus();
+    }, 3000);
+}
+function clearBonusNote() {
+    clearTimeout(bonusNoteTimer);
+    bonusNoteTimer = null;
+    $('bonusInfo').classList.remove('note');
 }
 
 function setBonusCity(name) {
+    clearBonusNote();
     bonusCity = name || null;
     store.set('bonusCity', bonusCity || '');
     fillCitySelect();
-}
-
-function showBonusPanel(open) {
-    $('bonusPanel').hidden = !open;
-    $('bonusListBtn').setAttribute('aria-expanded', String(open));
 }
 
 // Rebuild the city menu; the remembered city stays listed even when today's
@@ -1729,30 +1701,30 @@ function fillCitySelect() {
     updateBonus();
 }
 
-// Apply the chosen city's bonus for the current time and refresh the panel
+// Apply the chosen city's bonus for the current time
 function updateBonus() {
     const t = translations[lang];
     if (bonusList && bonusList.date !== todayKey()) {   // a new day began
         bonusList = null;
-        $('bonusPaste').value = '';
         fillCitySelect();
         return;
     }
     const city = listCity();
     const minute = nowMinute();
+    let info = '';
     if (city) {
         const percent = bonusAt(city.slots, minute);
         const value = percent ? String(percent) : '';
         if ($('bonus').value !== value) { $('bonus').value = value; render(); }
         // When the bonus next changes
         const next = city.slots.flatMap(s => [s.from, s.to]).filter(m => m > minute && m < 24 * 60).sort((a, b) => a - b)[0];
-        $('bonusNow').textContent = `📍 ${city.name} · ${percent}%` + (next ? ` ${t.until} ${formatTime(next)}` : '');
+        info = `📍 ${percent}%` + (next ? ` ${t.until} ${formatTime(next)}` : '');
     } else if ($('bonus').value !== (store.get('bonus') || '') && document.activeElement !== $('bonus')) {
         $('bonus').value = store.get('bonus') || '';
         render();
     }
-    $('bonusNow').hidden = !city;
-    $('bonusListBtn').classList.toggle('active', !!bonusList);
+    if (!bonusNoteTimer) $('bonusInfo').textContent = info;
+    $('bonusPasteBtn').classList.toggle('active', !!bonusList);
 
     // Each city's current bonus in the menu
     for (const option of $('bonusCity').options) {
@@ -1760,32 +1732,13 @@ function updateBonus() {
         const percent = listed ? bonusAt(listed.slots, minute) : 0;
         option.textContent = option.value ? option.value + (percent ? ` · ${percent}%` : '') : t.manualBonus;
     }
-    $('bonusCity').hidden = !bonusList;
-    $('bonusClear').hidden = !bonusList && !$('bonusPaste').value;
-    $('bonusStatus').textContent = bonusList ? t.citiesFound(bonusList.cities.length)
-        : $('bonusPaste').value.trim() ? t.noBonuses : '';
-    $('bonusSlots').replaceChildren(...(city ? city.slots : []).map(s => {
-        const li = document.createElement('li');
-        li.dir = 'ltr';
-        li.textContent = `${formatTime(s.from)}–${formatTime(Math.min(s.to, 23 * 60 + 59))} ${s.percent}%`;
-        li.classList.toggle('now', s.from <= minute && minute < s.to);
-        return li;
-    }));
 }
 
-$('bonusListBtn').addEventListener('click', () => showBonusPanel($('bonusPanel').hidden));
-$('bonusNow').addEventListener('click', () => showBonusPanel($('bonusPanel').hidden));
-$('bonusPaste').addEventListener('input', () => setBonusList($('bonusPaste').value));
+$('bonusPasteBtn').addEventListener('click', pasteBonusList);
 $('bonusCity').addEventListener('change', () => setBonusCity($('bonusCity').value));
-$('bonusClear').addEventListener('click', () => {
-    $('bonusPaste').value = '';
-    setBonusList('');
-    $('bonusPaste').focus();
-});
 setInterval(updateBonus, 15000);
 document.addEventListener('visibilitychange', updateBonus);
 
-$('bonusPaste').value = bonusList?.text || '';
 $('bonus').value = store.get('bonus') || '';
 applyLanguage();
 
