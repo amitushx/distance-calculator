@@ -706,6 +706,42 @@
     }
     #helpBtn:hover { color: var(--accent); }
     #helpBtn:focus-visible { outline: 2px solid var(--accent); }
+
+    /* New version banner: top center, clear of the help button */
+    #update {
+        position: fixed;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 90000;   /* above widgets and menus, below the alarm popup */
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: max-content;
+        max-width: calc(100vw - 112px);
+        padding: 6px;
+        padding-inline-start: 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--text);
+        box-shadow: var(--shadow);
+        font-size: 14px;
+    }
+    #update[hidden] { display: none; }
+    #update .icon { flex: none; color: var(--accent); }
+    #updateBtn {
+        flex: none;
+        padding: 6px 14px;
+        border: none;
+        border-radius: 999px;
+        background: var(--accent);
+        color: var(--card);
+        font: inherit;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    #updateBtn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
     @media (max-width: 480px) { body { padding-top: 52px; } }
     #help {
         width: min(440px, calc(100vw - 32px));
@@ -773,6 +809,7 @@
     <symbol id="i-clipboard" viewBox="0 0 24 24"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/></symbol>
     <symbol id="i-calculator" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M8 8a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1v1a1 1 0 0 1 -1 1h-6a1 1 0 0 1 -1 -1z"/><path d="M8 14v.01M12 14v.01M16 14v.01M8 17v.01M12 17v.01M16 17v.01"/></symbol>
     <symbol id="i-clock-late" viewBox="0 0 24 24"><path d="M20.986 12.502a9 9 0 1 0 -5.973 7.98"/><path d="M12 7v5l3 3"/><path d="M19 16v3"/><path d="M19 22v.01"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/></symbol>
 </svg>
 <main>
@@ -868,6 +905,11 @@
 <button id="helpBtn" type="button" aria-haspopup="dialog">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 11v6M12 7.5h.01"/></svg>
 </button>
+<div id="update" role="status" hidden>
+    <svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>
+    <span id="updateText"></span>
+    <button id="updateBtn" type="button"></button>
+</div>
 <dialog id="help" aria-labelledby="helpTitle">
     <div class="help-inner">
         <div class="help-head">
@@ -1141,7 +1183,9 @@ const translations = {
         stop: 'עצירה',
         help: 'עזרה',
         helpTitle: 'איך משתמשים',
-        language: 'שפה'
+        language: 'שפה',
+        newVersion: 'יש גרסה חדשה',
+        refresh: 'רענון'
     },
     en: {
         name: 'English',
@@ -1198,7 +1242,9 @@ const translations = {
         stop: 'Stop',
         help: 'Help',
         helpTitle: 'How to use',
-        language: 'Language'
+        language: 'Language',
+        newVersion: 'A new version is available',
+        refresh: 'Refresh'
     },
     ar: {
         name: 'عربي',
@@ -1255,7 +1301,9 @@ const translations = {
         stop: 'وقّف',
         help: 'مساعدة',
         helpTitle: 'كيف تستعملوه',
-        language: 'اللغة'
+        language: 'اللغة',
+        newVersion: 'في نسخة جديدة',
+        refresh: 'تحديث'
     },
     ka: {
         name: 'ქართული',
@@ -1312,7 +1360,9 @@ const translations = {
         stop: 'გაჩერება',
         help: 'დახმარება',
         helpTitle: 'როგორ გამოვიყენოთ',
-        language: 'ენა'
+        language: 'ენა',
+        newVersion: 'ხელმისაწვდომია ახალი ვერსია',
+        refresh: 'განახლება'
     },
     hi: {
         name: 'हिन्दी',
@@ -1369,7 +1419,9 @@ const translations = {
         stop: 'रोकें',
         help: 'मदद',
         helpTitle: 'कैसे इस्तेमाल करें',
-        language: 'भाषा'
+        language: 'भाषा',
+        newVersion: 'नया वर्ज़न उपलब्ध है',
+        refresh: 'रीफ़्रेश करें'
     }
 };
 
@@ -1405,6 +1457,8 @@ function applyLanguage() {
     $('helpBtn').setAttribute('aria-label', t.help);
     $('helpTitle').textContent = t.helpTitle;
     $('helpClose').title = t.close;
+    $('updateText').textContent = t.newVersion;
+    $('updateBtn').textContent = t.refresh;
     document.querySelectorAll('.help-body').forEach(el => { el.hidden = el.lang !== lang; });
     translateWidgets();
     updateThemeButton();
@@ -2432,6 +2486,25 @@ document.addEventListener('visibilitychange', requestWakeLock);
 document.addEventListener('pointerdown', requestWakeLock);
 document.addEventListener('keydown', requestWakeLock);
 requestWakeLock();
+
+// New version: GitHub Pages stamps every file with the deploy time, so a
+// page newer than the one running means a push landed, whichever file it
+// changed. Offer a refresh rather than reloading under the user.
+const loadedAt = Date.parse(document.lastModified);
+async function checkForUpdate() {
+    if (document.visibilityState !== 'visible' || !$('update').hidden) return;
+    try {
+        const res = await fetch(location.href, { method: 'HEAD', cache: 'no-store' });
+        const deployedAt = Date.parse(res.headers.get('last-modified'));
+        if (deployedAt > loadedAt) $('update').hidden = false;
+    } catch {
+        // Offline - try again later
+    }
+}
+$('updateBtn').addEventListener('click', () => location.reload());
+document.addEventListener('visibilitychange', checkForUpdate);
+setInterval(checkForUpdate, 10 * 60000);
+checkForUpdate();
 </script>
 </body>
 </html>
