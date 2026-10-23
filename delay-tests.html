@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Delivery Late tests</title>
+<style>
+    body { font: 14px/1.6 system-ui, sans-serif; margin: 24px; }
+    .pass { color: #15803d; }
+    .fail { color: #b91c1c; font-weight: 600; }
+</style>
+</head>
+<body>
+<h1 id="summary"></h1>
+<ol id="results"></ol>
+<script src="delay.js"></script>
+<script>
+// [minutes, price, retail, woltPlus, expected compensation]
+const CASES = [
+    // Restaurant
+    [0, 100, false, false, 0],
+    [15, 100, false, false, 0],
+    [16, 100, false, false, 'deliveryFee'],
+    [25, 100, false, false, 'deliveryFee'],
+    [16, 100, false, true, 10],
+    [25, 100, false, true, 10],
+    [26, 100, false, false, 18],
+    [30, 100, false, true, 18],        // Wolt+ only changes 16-25
+    [31, 100, false, false, 19],
+    [40, 145.90, false, false, 28],    // 27.721 rounds up
+    [41, 100, false, false, 28],
+    [45, 50.50, false, false, 15],     // 14.14 rounds up
+    [46, 100, false, false, 30],
+    [90, 99.99, false, false, 30],     // 29.997 rounds up
+    [26, 50, false, false, 9],         // exactly 9, not 10
+    [26, 0.1, false, false, 1],
+    [26, 0, false, false, 0],
+    // Retail
+    [15, 100, true, false, 0],
+    [25, 100, true, true, 0],
+    [26, 100, true, false, 20],
+    [40, 0, true, false, 20],
+    [26, 100, true, true, 10],
+    [40, 100, true, true, 10],
+    [41, 100, true, false, 25],
+    [50, 100, true, true, 25],         // Wolt+ only changes 26-40
+    [51, 100, true, false, 30],
+    [120, 100, true, false, 30]
+];
+
+const results = [];
+for (const [minutes, price, retail, woltPlus, expected] of CASES) {
+    const got = delayCompensation(minutes, price, retail, woltPlus);
+    results.push({
+        ok: got === expected,
+        text: `${retail ? 'retail' : 'restaurant'}${woltPlus ? ' Wolt+' : ''}, ${minutes} min, ₪${price} → ${got} (expected ${expected})`
+    });
+}
+
+const failed = results.filter(r => !r.ok).length;
+document.getElementById('summary').textContent = failed ? `${failed} of ${results.length} failed` : `All ${results.length} passed`;
+document.getElementById('summary').className = failed ? 'fail' : 'pass';
+for (const r of results) {
+    const li = document.createElement('li');
+    li.className = r.ok ? 'pass' : 'fail';
+    li.textContent = r.text;
+    document.getElementById('results').append(li);
+}
+</script>
+</body>
+</html>

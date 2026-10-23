@@ -259,18 +259,55 @@
     }
     #lang:hover { color: var(--text); }
     .actions { position: relative; display: flex; align-items: center; gap: 14px; }
+    /* Line icons from the sprite at the top of <body> */
+    .icon {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        vertical-align: middle;
+    }
     #widgetsBtn, #paletteBtn, #theme {
+        display: grid;
         padding: 0;
         border: none;
         background: none;
-        font-size: 15px;
+        color: var(--muted);
         cursor: pointer;
-        opacity: .5;
-        filter: grayscale(1);
-        transition: opacity .15s, filter .15s;
+        transition: color .15s;
     }
     #widgetsBtn:hover, #paletteBtn:hover, #theme:hover,
-    #widgetsBtn[aria-expanded="true"], #paletteBtn[aria-expanded="true"] { opacity: 1; filter: none; }
+    #widgetsBtn[aria-expanded="true"], #paletteBtn[aria-expanded="true"] { color: var(--accent); }
+
+    /* Segmented switches: which calculator, and the order type */
+    .tabs {
+        display: flex;
+        padding: 3px;
+        margin-bottom: 24px;
+        background: var(--bg);
+        border-radius: 999px;
+    }
+    .tabs button {
+        flex: 1;
+        padding: 7px 0;
+        border: none;
+        border-radius: 999px;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        transition: color .15s, background .15s;
+    }
+    .tabs button:hover { color: var(--text); }
+    .tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+    .tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    #orderType { margin-bottom: 20px; }
+    #orderType button { padding: 5px 0; font-size: 13px; }
+    #orderType button[aria-selected="true"] { background: var(--card); color: var(--text); }
 
     .menu {
         position: absolute;
@@ -338,7 +375,10 @@
     .field input::placeholder { color: var(--line); }
     .field span { color: var(--muted); font-size: 14px; white-space: nowrap; }
 
-    #distanceField input { font-size: 44px; font-weight: 500; }
+    #distanceField input, #minutesField input { font-size: 44px; font-weight: 500; }
+    #priceField { width: 170px; min-width: 0; }
+    #priceField input { font-size: 18px; }
+    #priceField.unused { visibility: hidden; }   /* retail ignores the price; keep the row still */
 
     .row {
         display: flex;
@@ -365,17 +405,30 @@
     }
     #bonusCity:focus { outline: none; border-color: var(--accent); }
     #bonusPasteBtn {
+        display: grid;
         padding: 0;
         border: none;
         background: none;
-        font-size: 18px;
+        color: var(--muted);
         cursor: pointer;
-        opacity: .5;
-        filter: grayscale(1);
-        transition: opacity .15s, filter .15s;
+        transition: color .15s;
     }
-    #bonusPasteBtn:hover, #bonusPasteBtn.active { opacity: 1; filter: none; }
+    #bonusPasteBtn .icon { width: 20px; height: 20px; }
+    #bonusPasteBtn:hover, #bonusPasteBtn.active { color: var(--accent); }
     #bonusInfo { min-height: 1.4em; margin-top: 6px; color: var(--accent); font-size: 13px; }
+    /* Map pin before the city's current bonus */
+    #bonusInfo:not(.note):not(:empty)::before {
+        content: '';
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        margin-inline-end: 4px;
+        vertical-align: -2px;
+        background: currentColor;
+        -webkit-mask: var(--pin) center / contain no-repeat;
+        mask: var(--pin) center / contain no-repeat;
+        --pin: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0'/%3E%3Cpath d='M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z'/%3E%3C/svg%3E");
+    }
     #bonusInfo.note { color: var(--muted); }
 
     .switch {
@@ -434,9 +487,11 @@
         font-variant-numeric: tabular-nums;
     }
     #amount small { font-size: .5em; font-weight: 500; margin-inline-end: 4px; }
+    #amount.words { font-size: 34px; line-height: 56px; }   /* "Delivery Fee" instead of a sum */
     #caption { display: block; margin-top: 10px; font-size: 13px; opacity: .8; }
 
     footer { font-size: 12px; color: var(--muted); }
+    footer .icon { width: 14px; height: 14px; color: var(--accent); vertical-align: -2px; }
 
     .widget {
         position: fixed;
@@ -672,11 +727,15 @@
     }
     #helpClose:hover { color: var(--text); }
     .help-body h3 {
+        display: flex;
+        align-items: center;
+        gap: 6px;
         margin-top: 18px;
         color: var(--accent);
         font-size: 14px;
         font-weight: 500;
     }
+    .help-body li .icon { width: 1.1em; height: 1.1em; vertical-align: -.2em; color: var(--accent); }
     .help-body ul { margin-top: 6px; padding-inline-start: 18px; }
     .help-body li { margin-top: 5px; font-size: 14px; line-height: 1.5; }
     .help-body li::marker { color: var(--muted); }
@@ -692,12 +751,23 @@
 </style>
 </head>
 <body>
+<!-- Line icons (Tabler, outline), used as <svg class="icon"><use href="#i-name"/></svg> -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M4 7h3a1 1 0 0 0 1 -1v-1a2 2 0 0 1 4 0v1a1 1 0 0 0 1 1h3a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h1a2 2 0 0 1 0 4h-1a1 1 0 0 0 -1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-1a2 2 0 0 0 -4 0v1a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h1a2 2 0 0 0 0 -4h-1a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"/><path d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/></symbol>
+    <symbol id="i-calculator" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M8 8a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1v1a1 1 0 0 1 -1 1h-6a1 1 0 0 1 -1 -1z"/><path d="M8 14v.01M12 14v.01M16 14v.01M8 17v.01M12 17v.01M16 17v.01"/></symbol>
+    <symbol id="i-clock-late" viewBox="0 0 24 24"><path d="M20.986 12.502a9 9 0 1 0 -5.973 7.98"/><path d="M12 7v5l3 3"/><path d="M19 16v3"/><path d="M19 22v.01"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/></symbol>
+</svg>
 <main>
     <header>
         <h1 id="title"></h1>
         <div class="actions">
-            <button id="widgetsBtn" type="button" aria-expanded="false">🧩</button>
-            <button id="paletteBtn" type="button" aria-expanded="false">🎨</button>
+            <button id="widgetsBtn" type="button" aria-expanded="false"><svg class="icon"><use href="#i-puzzle"/></svg></button>
+            <button id="paletteBtn" type="button" aria-expanded="false"><svg class="icon"><use href="#i-palette"/></svg></button>
             <button id="theme" type="button"></button>
             <button id="lang" type="button"></button>
             <div id="paletteMenu" class="menu" role="menu" hidden>
@@ -717,30 +787,62 @@
         </div>
     </header>
 
-    <label class="field" id="distanceField">
-        <input id="distance" type="number" inputmode="numeric" min="0" placeholder="0" autofocus autocomplete="off">
-        <span id="metersLabel"></span>
-        <kbd>D</kbd>
-    </label>
+    <div class="tabs" id="calcTabs" role="tablist">
+        <button type="button" role="tab" data-calc="distance" data-t="tabDistance"></button>
+        <button type="button" role="tab" data-calc="delay" data-t="tabDelay"></button>
+    </div>
 
-    <div class="row">
-        <label class="field" id="bonusField">
-            <input id="bonus" type="number" inputmode="decimal" min="0" placeholder="0" autocomplete="off">
-            <span id="bonusLabel"></span>
-            <kbd>B</kbd>
+    <div id="distanceCalc">
+        <label class="field" id="distanceField">
+            <input id="distance" type="number" inputmode="numeric" min="0" placeholder="0" autofocus autocomplete="off">
+            <span id="metersLabel"></span>
+            <kbd>D</kbd>
         </label>
-        <label class="switch">
-            <input id="walker" type="checkbox">
-            <span class="track"></span>
-            <span id="walkerLabel"></span>
-            <kbd>W</kbd>
+
+        <div class="row">
+            <label class="field" id="bonusField">
+                <input id="bonus" type="number" inputmode="decimal" min="0" placeholder="0" autocomplete="off">
+                <span id="bonusLabel"></span>
+                <kbd>B</kbd>
+            </label>
+            <label class="switch">
+                <input id="walker" type="checkbox">
+                <span class="track"></span>
+                <span id="walkerLabel"></span>
+                <kbd>W</kbd>
+            </label>
+        </div>
+        <div class="bonus-pick">
+            <select id="bonusCity"></select>
+            <button id="bonusPasteBtn" type="button"><svg class="icon"><use href="#i-clipboard"/></svg></button>
+        </div>
+        <div id="bonusInfo" aria-live="polite"></div>
+    </div>
+
+    <div id="delayCalc" hidden>
+        <div class="tabs" id="orderType" role="tablist">
+            <button type="button" role="tab" data-order="restaurant" data-t="restaurant"></button>
+            <button type="button" role="tab" data-order="retail" data-t="retail"></button>
+        </div>
+        <label class="field" id="minutesField">
+            <input id="minutes" type="number" inputmode="numeric" min="0" step="1" placeholder="0" autocomplete="off">
+            <span data-t="minutesLate"></span>
+            <kbd>M</kbd>
         </label>
+        <div class="row">
+            <label class="field" id="priceField">
+                <input id="price" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" autocomplete="off">
+                <span data-t="orderTotal"></span>
+                <kbd>P</kbd>
+            </label>
+            <label class="switch">
+                <input id="woltPlus" type="checkbox">
+                <span class="track"></span>
+                <span data-t="woltPlus"></span>
+                <kbd>W</kbd>
+            </label>
+        </div>
     </div>
-    <div class="bonus-pick">
-        <select id="bonusCity"></select>
-        <button id="bonusPasteBtn" type="button">📋</button>
-    </div>
-    <div id="bonusInfo" aria-live="polite"></div>
 
     <button id="result" type="button" disabled>
         <span id="amount" dir="ltr">—</span>
@@ -760,51 +862,65 @@
             <button id="helpClose" type="button">×</button>
         </div>
         <div class="help-body" lang="he">
-            <h3>🧮 המחשבון</h3>
+            <h3><svg class="icon"><use href="#i-calculator"/></svg>מחשבון מרחק</h3>
             <ul>
                 <li>הקלידו את המרחק במטרים, והתשלום יופיע למטה, מעוגל כלפי מעלה לשקל שלם.</li>
                 <li>הוסיפו אחוז בונוס אם יש, והפעילו <b>ווקר</b> לשליחים רגליים.</li>
                 <li>לחיצה על הסכום או <kbd>Enter</kbd> מעתיקים אותו, ו־<kbd>Esc</kbd> מנקה.</li>
                 <li>קיצורים: <kbd>D</kbd> מרחק, <kbd>B</kbd> בונוס, <kbd>W</kbd> ווקר.</li>
             </ul>
-            <h3>📋 רשימת הבונוסים</h3>
+            <h3><svg class="icon"><use href="#i-clock-late"/></svg>דליברי לייט</h3>
             <ul>
-                <li>העתיקו את הודעת הבונוסים של היום, ולחצו על 📋 כדי להדביק אותה.</li>
+                <li>הפיצוי ללקוח על משלוח שהתאחר. עוברים אליו מהלשונית למעלה, או עם <kbd>L</kbd>.</li>
+                <li>בחרו מסעדה או ריטייל, הקלידו כמה דקות המשלוח איחר, ובמסעדה גם את סכום ההזמנה כולל הכל.</li>
+                <li>הפיצוי המקסימלי מופיע למטה, מעוגל כלפי מעלה לשקל שלם (קרדיט אחד הוא שקל). הפעילו <b>וולט פלוס</b> ללקוחות המנוי.</li>
+                <li>קיצורים: <kbd>M</kbd> דקות, <kbd>P</kbd> סכום, <kbd>W</kbd> וולט פלוס, <kbd>T</kbd> מסעדה או ריטייל.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-clipboard"/></svg>רשימת הבונוסים</h3>
+            <ul>
+                <li>העתיקו את הודעת הבונוסים של היום, ולחצו על <svg class="icon"><use href="#i-clipboard"/></svg> כדי להדביק אותה.</li>
                 <li>בחרו את העיר שלכם, והבונוס יתעדכן לבד לפי השעה, עם עד מתי הוא בתוקף.</li>
                 <li>הרשימה נשמרת עד סוף היום, והעיר נשמרת גם למחר. הקלדת בונוס או בחירה ב״בונוס ידני״ מחזירות לבונוס הידני.</li>
             </ul>
-            <h3>🧩 ווידג׳טים</h3>
+            <h3><svg class="icon"><use href="#i-puzzle"/></svg>ווידג׳טים</h3>
             <ul>
-                <li>מהכפתור 🧩 מפעילים שעון, שעון מעורר, פתק ושמיים. גררו אותם לאן שנוח, והם יישארו שם.</li>
+                <li>מהכפתור <svg class="icon"><use href="#i-puzzle"/></svg> מפעילים שעון, שעון מעורר, פתק ושמיים. גררו אותם לאן שנוח, והם יישארו שם.</li>
                 <li>בשעון המעורר קובעים שעה להפסקה ארוכה, להפסקה קצרה ולירידה מהמשמרת, ובוחרים צליל. כשהוא מצלצל, לחיצה או <kbd>Esc</kbd> עוצרים אותו.</li>
             </ul>
-            <h3>🎨 ערכות צבעים</h3>
+            <h3><svg class="icon"><use href="#i-palette"/></svg>ערכות צבעים</h3>
             <ul>
-                <li>🎨 בוחר ערכת צבעים, 🌙/☀️ עובר בין מצב בהיר לכהה, וכפתור השפה עובר בין עברית לאנגלית.</li>
+                <li><svg class="icon"><use href="#i-palette"/></svg> בוחר ערכת צבעים, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> עובר בין מצב בהיר לכהה, וכפתור השפה עובר בין עברית לאנגלית.</li>
             </ul>
         </div>
         <div class="help-body" lang="en">
-            <h3>🧮 The calculator</h3>
+            <h3><svg class="icon"><use href="#i-calculator"/></svg>Distance calculator</h3>
             <ul>
                 <li>Type the distance in meters and the payment shows below, rounded up to a whole shekel.</li>
                 <li>Add a bonus percentage if there is one, and turn on <b>Walker</b> for couriers on foot.</li>
                 <li>Click the amount or press <kbd>Enter</kbd> to copy it; <kbd>Esc</kbd> clears.</li>
                 <li>Shortcuts: <kbd>D</kbd> distance, <kbd>B</kbd> bonus, <kbd>W</kbd> walker.</li>
             </ul>
-            <h3>📋 The bonus list</h3>
+            <h3><svg class="icon"><use href="#i-clock-late"/></svg>Delivery Late</h3>
             <ul>
-                <li>Copy the day's bonus message, then press 📋 to paste it.</li>
+                <li>The customer's compensation for a late delivery. Switch to it with the tab at the top, or press <kbd>L</kbd>.</li>
+                <li>Pick Restaurant or Retail, type how many minutes late the delivery was, and for restaurants the order total with everything included.</li>
+                <li>The maximum compensation shows below, rounded up to a whole shekel (one credit is one shekel). Turn on <b>Wolt+</b> for subscribers.</li>
+                <li>Shortcuts: <kbd>M</kbd> minutes, <kbd>P</kbd> price, <kbd>W</kbd> Wolt+, <kbd>T</kbd> restaurant or retail.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-clipboard"/></svg>The bonus list</h3>
+            <ul>
+                <li>Copy the day's bonus message, then press <svg class="icon"><use href="#i-clipboard"/></svg> to paste it.</li>
                 <li>Pick your city and the bonus follows the clock by itself, showing until when it holds.</li>
                 <li>The list is kept until the end of the day, and your city is remembered for tomorrow. Typing a bonus or picking “Manual bonus” switches back to your own bonus.</li>
             </ul>
-            <h3>🧩 Widgets</h3>
+            <h3><svg class="icon"><use href="#i-puzzle"/></svg>Widgets</h3>
             <ul>
-                <li>The 🧩 button turns on a clock, alarms, a note and the sky. Drag them anywhere and they stay put.</li>
+                <li>The <svg class="icon"><use href="#i-puzzle"/></svg> button turns on a clock, alarms, a note and the sky. Drag them anywhere and they stay put.</li>
                 <li>Set alarms for the long break, the short break and the end of the shift, and pick a sound. When one rings, click or press <kbd>Esc</kbd> to stop it.</li>
             </ul>
-            <h3>🎨 Themes</h3>
+            <h3><svg class="icon"><use href="#i-palette"/></svg>Themes</h3>
             <ul>
-                <li>🎨 picks a color theme, 🌙/☀️ switches between light and dark, and the language button switches between Hebrew and English.</li>
+                <li><svg class="icon"><use href="#i-palette"/></svg> picks a color theme, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> switches between light and dark, and the language button switches between Hebrew and English.</li>
             </ul>
         </div>
     </div>
@@ -861,10 +977,21 @@
 
 <script src="fees.js"></script>
 <script src="bonus.js"></script>
+<script src="delay.js"></script>
 <script>
 const translations = {
     he: {
         title: 'מחשבון מרחק',
+        delayTitle: 'דליברי לייט',
+        tabDistance: 'מרחק',
+        tabDelay: 'דליברי לייט',
+        restaurant: 'מסעדה',
+        retail: 'ריטייל',
+        minutesLate: 'דקות איחור',
+        orderTotal: '₪ הזמנה',
+        woltPlus: 'וולט פלוס',
+        deliveryFee: 'דמי משלוח',
+        needPrice: 'הקלידו את סכום ההזמנה',
         meters: 'מטרים',
         bonus: '% בונוס',
         pasteList: 'הדבקת רשימת הבונוסים שהועתקה',
@@ -880,7 +1007,7 @@ const translations = {
         copyFailed: 'לא ניתן להעתיק',
         lightMode: 'מצב בהיר',
         darkMode: 'מצב כהה',
-        credit: 'נעשה עם ❤️ על ידי עמית כהן ו־Claude',
+        credit: 'נעשה עם {heart} על ידי עמית כהן ו־Claude',
         palette: 'ערכת צבעים',
         classic: 'קלאסי',
         cute: 'קיוט',
@@ -898,7 +1025,7 @@ const translations = {
         soundBeep: 'צפצוף',
         soundChime: 'פעמון',
         soundSiren: 'סירנה',
-        soundMeow: 'מיאו 🐱',
+        soundMeow: 'מיאו',
         note: 'פתק',
         sky: 'שמיים',
         notePlaceholder: 'כתבו משהו…',
@@ -910,6 +1037,16 @@ const translations = {
     },
     en: {
         title: 'Distance Calculator',
+        delayTitle: 'Delivery Late',
+        tabDistance: 'Distance',
+        tabDelay: 'Delivery Late',
+        restaurant: 'Restaurant',
+        retail: 'Retail',
+        minutesLate: 'minutes late',
+        orderTotal: '₪ order',
+        woltPlus: 'Wolt+',
+        deliveryFee: 'Delivery Fee',
+        needPrice: 'Enter the order total',
         meters: 'meters',
         bonus: '% bonus',
         pasteList: 'Paste the copied bonus list',
@@ -925,7 +1062,7 @@ const translations = {
         copyFailed: 'Could not copy',
         lightMode: 'Light mode',
         darkMode: 'Dark mode',
-        credit: 'Made with ❤️ by Amit Cohen and Claude',
+        credit: 'Made with {heart} by Amit Cohen and Claude',
         palette: 'Theme',
         classic: 'Classic',
         cute: 'Cute',
@@ -943,7 +1080,7 @@ const translations = {
         soundBeep: 'Beep',
         soundChime: 'Chime',
         soundSiren: 'Siren',
-        soundMeow: 'Meow 🐱',
+        soundMeow: 'Meow',
         note: 'Note',
         sky: 'Sky',
         notePlaceholder: 'Write something…',
@@ -964,20 +1101,21 @@ const store = {
 };
 
 let lang = store.get('lang') === 'en' ? 'en' : 'he';
-let current = null;      // payment currently shown, or null if none
+let calc = store.get('calc') === 'delay' ? 'delay' : 'distance';   // which calculator is shown
+let orderType = store.get('orderType') === 'retail' ? 'retail' : 'restaurant';
+let current = null;      // amount currently shown, or null if none
 let captionTimer = null;
 
 function applyLanguage() {
     const t = translations[lang];
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-    document.title = t.title;
-    $('title').textContent = t.title;
+    document.title = $('title').textContent = calc === 'delay' ? t.delayTitle : t.title;
     $('lang').textContent = t.otherLang;
     $('metersLabel').textContent = t.meters;
     $('bonusLabel').textContent = t.bonus;
     $('walkerLabel').textContent = t.walker;
-    $('credit').textContent = t.credit;
+    $('credit').innerHTML = t.credit.replace('{heart}', icon('heart'));
     $('paletteBtn').title = t.palette;
     $('bonusPasteBtn').title = t.pasteList;
     $('helpBtn').title = t.help;
@@ -995,20 +1133,28 @@ function applyLanguage() {
 // header button. The palette menu picks which light/dark pair is used.
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
 const isDark = () => document.documentElement.dataset.mode === 'dark';
+const icon = name => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 // The button shows the mode it switches to
 function updateThemeButton() {
-    $('theme').textContent = isDark() ? '☀️' : '🌙';
+    $('theme').innerHTML = icon(isDark() ? 'sun' : 'moon');
     $('theme').title = translations[lang][isDark() ? 'lightMode' : 'darkMode'];
 }
 
-// Recalculate and show the payment for the current inputs
+// Recalculate and show the amount for the current calculator's inputs
 function render() {
+    clearTimeout(captionTimer);
+    $('amount').classList.remove('words');
+    if (calc === 'delay') renderDelay();
+    else renderDistance();
+    $('result').disabled = current === null && !$('amount').classList.contains('words');
+}
+
+function renderDistance() {
     const t = translations[lang];
     const raw = $('distance').value;
     const meters = Number(raw);
     const bonus = Math.max(Number($('bonus').value) || 0, 0);
 
-    clearTimeout(captionTimer);
     if (raw === '' || !(meters >= 10)) {
         current = null;
         $('amount').textContent = '—';
@@ -1018,7 +1164,61 @@ function render() {
         $('amount').innerHTML = `<small>₪</small>${current}`;
         $('caption').innerHTML = t.hint;
     }
-    $('result').disabled = current === null;
+}
+
+// Delivery Late: the maximum compensation for the customer
+function renderDelay() {
+    const t = translations[lang];
+    const retail = orderType === 'retail';
+    const minutesRaw = $('minutes').value;
+    const priceRaw = $('price').value;
+    const minutes = Number(minutesRaw);
+    const price = Number(priceRaw);
+    const priceNeeded = minutesRaw !== '' && minutes >= 0 && needsPrice(minutes, retail);
+    $('priceField').classList.toggle('unused', retail);
+
+    current = null;
+    if (minutesRaw === '' || !(minutes >= 0)) {
+        $('amount').textContent = '—';
+        $('caption').textContent = ' ';
+    } else if (priceNeeded && (priceRaw === '' || !(price >= 0))) {
+        $('amount').textContent = '—';
+        $('caption').textContent = t.needPrice;
+    } else {
+        const value = delayCompensation(minutes, price, retail, $('woltPlus').checked);
+        if (value === 'deliveryFee') {
+            $('amount').textContent = t.deliveryFee;
+            $('amount').classList.add('words');
+            $('caption').textContent = ' ';
+        } else {
+            current = value;
+            $('amount').innerHTML = `<small>₪</small>${current}`;
+            $('caption').innerHTML = t.hint;
+        }
+    }
+}
+
+// Switch between the distance and Delivery Late calculators
+function setCalc(name, focus = true) {
+    calc = name;
+    store.set('calc', calc);
+    $('distanceCalc').hidden = calc !== 'distance';
+    $('delayCalc').hidden = calc !== 'delay';
+    $('calcTabs').querySelectorAll('[data-calc]').forEach(b => {
+        b.setAttribute('aria-selected', String(b.dataset.calc === calc));
+    });
+    applyLanguage();   // the title follows the calculator
+    if (focus) firstField().focus();
+}
+const firstField = () => $(calc === 'delay' ? 'minutes' : 'distance');
+
+function setOrderType(type) {
+    orderType = type;
+    store.set('orderType', orderType);
+    $('orderType').querySelectorAll('[data-order]').forEach(b => {
+        b.setAttribute('aria-selected', String(b.dataset.order === orderType));
+    });
+    render();
 }
 
 // Fallback for browsers without the async clipboard API
@@ -1059,9 +1259,20 @@ $('bonus').addEventListener('input', () => {
     render();
 });
 $('walker').addEventListener('change', render);
+$('minutes').addEventListener('input', render);
+$('price').addEventListener('input', render);
+$('woltPlus').addEventListener('change', render);
+$('calcTabs').addEventListener('click', e => {
+    const button = e.target.closest('[data-calc]');
+    if (button) setCalc(button.dataset.calc);
+});
+$('orderType').addEventListener('click', e => {
+    const button = e.target.closest('[data-order]');
+    if (button) setOrderType(button.dataset.order);
+});
 $('result').addEventListener('click', () => {
     copyAmount();
-    $('distance').focus();
+    firstField().focus();
 });
 $('theme').addEventListener('click', () => {
     const mode = isDark() ? 'light' : 'dark';
@@ -1127,7 +1338,7 @@ $('helpBtn').addEventListener('click', () => {
 });
 $('helpClose').addEventListener('click', () => $('help').close());
 $('help').addEventListener('click', e => { if (e.target === $('help')) $('help').close(); });
-$('help').addEventListener('close', () => $('distance').focus());
+$('help').addEventListener('close', () => firstField().focus());
 
 document.addEventListener('keydown', e => {
     // The dialog handles its own keys (Escape closes it)
@@ -1146,14 +1357,33 @@ document.addEventListener('keydown', e => {
         e.preventDefault();
         copyAmount();
     } else if (e.key === 'Escape') {
-        $('distance').value = '';
-        $('walker').checked = false;
+        if (calc === 'delay') {
+            $('minutes').value = $('price').value = '';
+            $('woltPlus').checked = false;
+        } else {
+            $('distance').value = '';
+            $('walker').checked = false;
+        }
         render();
-        $('distance').focus();
-    } else if (e.code === 'KeyW') {   // physical key, works on Hebrew layout too
+        firstField().focus();
+    } else if (e.code === 'KeyL') {   // physical key, works on Hebrew layout too
         e.preventDefault();
-        $('walker').checked = !$('walker').checked;
+        setCalc(calc === 'delay' ? 'distance' : 'delay');
+    } else if (e.code === 'KeyW') {
+        e.preventDefault();
+        const box = $(calc === 'delay' ? 'woltPlus' : 'walker');
+        box.checked = !box.checked;
         render();
+    } else if (calc === 'delay') {
+        const field = { KeyM: 'minutes', KeyP: 'price' }[e.code];
+        if (field) {
+            e.preventDefault();
+            $(field).focus();
+            $(field).select();
+        } else if (e.code === 'KeyT') {
+            e.preventDefault();
+            setOrderType(orderType === 'retail' ? 'restaurant' : 'retail');
+        }
     } else if (e.code === 'KeyB') {
         e.preventDefault();
         $('bonus').focus();
@@ -1865,7 +2095,7 @@ function updateBonus() {
         if ($('bonus').value !== value) { $('bonus').value = value; render(); }
         // When the bonus next changes
         const next = city.slots.flatMap(s => [s.from, s.to]).filter(m => m > minute && m < 24 * 60).sort((a, b) => a - b)[0];
-        info = `📍 ${percent}%` + (next ? ` ${t.until} ${formatTime(next)}` : '');
+        info = `${percent}%` + (next ? ` ${t.until} ${formatTime(next)}` : '');
     } else if ($('bonus').value !== (store.get('bonus') || '') && document.activeElement !== $('bonus')) {
         $('bonus').value = store.get('bonus') || '';
         render();
@@ -1887,7 +2117,9 @@ setInterval(updateBonus, 15000);
 document.addEventListener('visibilitychange', updateBonus);
 
 $('bonus').value = store.get('bonus') || '';
-applyLanguage();
+setOrderType(orderType);
+setCalc(calc, false);
+firstField().focus();
 
 // Keep the screen awake while the page is visible. The browser releases the
 // lock when the tab is hidden, so re-request on visibility change; also retry
