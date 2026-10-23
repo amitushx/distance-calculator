@@ -30,13 +30,13 @@ function walkerFee(m) {
     return Math.min(700 + Math.ceil((m - 100) / 50) * 100, 1600);
 }
 
-// Final payment in whole shekels, rounded up, including bonus percentage.
+// Final payment rounded to the nearest whole shekel (halves up), including bonus percentage.
 function payment(meters, bonusPercent = 0, walker = false) {
     const base = walker ? walkerFee(meters) : riderFee(meters);
     // base * (100 + bonus) is in units of 1/10000 ILS; round away float noise
     // from fractional bonuses before dividing so exact integers stay exact.
     const units = Math.round(base * (100 + bonusPercent) * 100);
-    return Math.ceil(units / 1e6);
+    return Math.floor((units + 500000) / 1e6);
 }
 
 if (typeof module !== 'undefined') module.exports = { riderFee, walkerFee, payment };
