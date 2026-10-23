@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>מחשבון מרחק</title>
+<title>מחשבון תמיכה</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="icon-512.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -981,8 +981,7 @@
 <script>
 const translations = {
     he: {
-        title: 'מחשבון מרחק',
-        delayTitle: 'דליברי לייט',
+        title: 'מחשבון תמיכה',
         tabDistance: 'מרחק',
         tabDelay: 'דליברי לייט',
         restaurant: 'מסעדה',
@@ -1036,8 +1035,7 @@ const translations = {
         otherLang: 'English'
     },
     en: {
-        title: 'Distance Calculator',
-        delayTitle: 'Delivery Late',
+        title: 'Support Calculator',
         tabDistance: 'Distance',
         tabDelay: 'Delivery Late',
         restaurant: 'Restaurant',
@@ -1110,7 +1108,7 @@ function applyLanguage() {
     const t = translations[lang];
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-    document.title = $('title').textContent = calc === 'delay' ? t.delayTitle : t.title;
+    document.title = $('title').textContent = t.title;
     $('lang').textContent = t.otherLang;
     $('metersLabel').textContent = t.meters;
     $('bonusLabel').textContent = t.bonus;
@@ -1207,7 +1205,7 @@ function setCalc(name, focus = true) {
     $('calcTabs').querySelectorAll('[data-calc]').forEach(b => {
         b.setAttribute('aria-selected', String(b.dataset.calc === calc));
     });
-    applyLanguage();   // the title follows the calculator
+    render();
     if (focus) firstField().focus();
 }
 const firstField = () => $(calc === 'delay' ? 'minutes' : 'distance');
@@ -2119,6 +2117,7 @@ document.addEventListener('visibilitychange', updateBonus);
 $('bonus').value = store.get('bonus') || '';
 setOrderType(orderType);
 setCalc(calc, false);
+applyLanguage();
 firstField().focus();
 
 // Keep the screen awake while the page is visible. The browser releases the
