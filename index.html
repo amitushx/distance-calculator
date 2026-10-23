@@ -250,14 +250,17 @@
     h1 { font-size: 15px; font-weight: 500; color: var(--muted); }
     h1::after { content: var(--heart); color: var(--accent); }
     #lang {
+        padding: 0;
         border: none;
         background: none;
         color: var(--muted);
         font: inherit;
         font-size: 13px;
         cursor: pointer;
+        color-scheme: var(--scheme);
+        field-sizing: content;   /* as wide as the chosen language, not the longest */
     }
-    #lang:hover { color: var(--text); }
+    #lang:hover, #lang:focus-visible { color: var(--text); }
     .actions { position: relative; display: flex; align-items: center; gap: 14px; }
     /* Line icons from the sprite at the top of <body> */
     .icon {
@@ -769,7 +772,7 @@
             <button id="widgetsBtn" type="button" aria-expanded="false"><svg class="icon"><use href="#i-puzzle"/></svg></button>
             <button id="paletteBtn" type="button" aria-expanded="false"><svg class="icon"><use href="#i-palette"/></svg></button>
             <button id="theme" type="button"></button>
-            <button id="lang" type="button"></button>
+            <select id="lang"></select>
             <div id="paletteMenu" class="menu" role="menu" hidden>
                 <button type="button" role="menuitemradio" data-palette="classic"><span class="swatch"><i style="background: #ffffff"></i><i style="background: #000000"></i></span><span data-t="classic"></span></button>
                 <button type="button" role="menuitemradio" data-palette="cute"><span class="swatch"><i style="background: #ffd3e6"></i><i style="background: #261620"></i></span><span data-t="cute"></span></button>
@@ -889,7 +892,7 @@
             </ul>
             <h3><svg class="icon"><use href="#i-palette"/></svg>ערכות צבעים</h3>
             <ul>
-                <li><svg class="icon"><use href="#i-palette"/></svg> בוחר ערכת צבעים, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> עובר בין מצב בהיר לכהה, וכפתור השפה עובר בין עברית לאנגלית.</li>
+                <li><svg class="icon"><use href="#i-palette"/></svg> בוחר ערכת צבעים, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> עובר בין מצב בהיר לכהה, ובתפריט השפה בוחרים שפה.</li>
             </ul>
         </div>
         <div class="help-body" lang="en">
@@ -920,7 +923,100 @@
             </ul>
             <h3><svg class="icon"><use href="#i-palette"/></svg>Themes</h3>
             <ul>
-                <li><svg class="icon"><use href="#i-palette"/></svg> picks a color theme, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> switches between light and dark, and the language button switches between Hebrew and English.</li>
+                <li><svg class="icon"><use href="#i-palette"/></svg> picks a color theme, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> switches between light and dark, and the language menu picks the language.</li>
+            </ul>
+        </div>
+        <div class="help-body" lang="ar">
+            <h3><svg class="icon"><use href="#i-calculator"/></svg>حاسبة المسافة</h3>
+            <ul>
+                <li>اكتبوا المسافة بالمتر، والدفعة بتطلع تحت، مدوّرة لفوق لأقرب شيكل.</li>
+                <li>زيدوا نسبة البونص إذا في، وشغّلوا <b>ووكر</b> للمراسلين اللي ماشيين على رجليهم.</li>
+                <li>كبسة على المبلغ أو <kbd>Enter</kbd> بتنسخه، و<kbd>Esc</kbd> بيمسح.</li>
+                <li>اختصارات: <kbd>D</kbd> مسافة، <kbd>B</kbd> بونص، <kbd>W</kbd> ووكر.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-clock-late"/></svg>تأخير التوصيل</h3>
+            <ul>
+                <li>التعويض للزبون على توصيلة اتأخرت. بتنتقلوا إلها من التاب فوق، أو بـ<kbd>L</kbd>.</li>
+                <li>اختاروا مطعم أو متجر، اكتبوا قديش دقيقة اتأخرت التوصيلة، وبالمطعم كمان مبلغ الطلب مع كل إشي.</li>
+                <li>أعلى تعويض بيطلع تحت، مدوّر لفوق لأقرب شيكل (كل كريديت بشيكل). شغّلوا <b>Wolt+</b> للزباين المشتركين.</li>
+                <li>اختصارات: <kbd>M</kbd> دقايق، <kbd>P</kbd> مبلغ، <kbd>W</kbd> Wolt+، <kbd>T</kbd> مطعم أو متجر.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-clipboard"/></svg>قائمة البونصات</h3>
+            <ul>
+                <li>انسخوا رسالة بونصات اليوم، وبعدين اكبسوا على <svg class="icon"><use href="#i-clipboard"/></svg> عشان تلزقوها.</li>
+                <li>اختاروا مدينتكم، والبونص بيتحدّث لحاله حسب الساعة، ومعه لحد إيمتى صالح.</li>
+                <li>القائمة بتضل محفوظة لآخر اليوم، والمدينة بتنحفظ لبكرا كمان. إذا كتبتوا بونص أو اخترتوا «بونص يدوي» بترجعوا للبونص اليدوي.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-puzzle"/></svg>ويدجتات</h3>
+            <ul>
+                <li>من الزر <svg class="icon"><use href="#i-puzzle"/></svg> بتشغّلوا ساعة، منبّه، ملاحظة والسما. اسحبوهم وين ما بدكم، وبضلّوا هناك.</li>
+                <li>بالمنبّه بتحددوا ساعة للاستراحة الطويلة، للاستراحة القصيرة ولنهاية الشفت، وبتختاروا صوت. لما يرنّ، كبسة أو <kbd>Esc</kbd> بتوقفه.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-palette"/></svg>الألوان</h3>
+            <ul>
+                <li><svg class="icon"><use href="#i-palette"/></svg> بيختار الألوان، <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> بيبدّل بين الوضع الفاتح والغامق، ومن قائمة اللغة بتختاروا اللغة.</li>
+            </ul>
+        </div>
+        <div class="help-body" lang="ka">
+            <h3><svg class="icon"><use href="#i-calculator"/></svg>მანძილის კალკულატორი</h3>
+            <ul>
+                <li>შეიყვანეთ მანძილი მეტრებში და გადასახადი ქვემოთ გამოჩნდება, მთელ შეკელამდე ზემოთ დამრგვალებული.</li>
+                <li>დაამატეთ ბონუსის პროცენტი, თუ არის, და ფეხით მოსიარულე კურიერებისთვის ჩართეთ <b>ფეხით</b>.</li>
+                <li>თანხაზე დაწკაპება ან <kbd>Enter</kbd> მას აკოპირებს, <kbd>Esc</kbd> კი ასუფთავებს.</li>
+                <li>მალსახმობები: <kbd>D</kbd> მანძილი, <kbd>B</kbd> ბონუსი, <kbd>W</kbd> ფეხით.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-clock-late"/></svg>დაგვიანება</h3>
+            <ul>
+                <li>კომპენსაცია მომხმარებლისთვის დაგვიანებული მიწოდებისთვის. გადადით ზედა ჩანართით ან <kbd>L</kbd>-ით.</li>
+                <li>აირჩიეთ რესტორანი ან მაღაზია, შეიყვანეთ რამდენი წუთით დაიგვიანა მიწოდებამ, ხოლო რესტორნისთვის — შეკვეთის სრული თანხაც.</li>
+                <li>მაქსიმალური კომპენსაცია ქვემოთ ჩანს, მთელ შეკელამდე ზემოთ დამრგვალებული (ერთი კრედიტი ერთი შეკელია). გამომწერებისთვის ჩართეთ <b>Wolt+</b>.</li>
+                <li>მალსახმობები: <kbd>M</kbd> წუთები, <kbd>P</kbd> თანხა, <kbd>W</kbd> Wolt+, <kbd>T</kbd> რესტორანი ან მაღაზია.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-clipboard"/></svg>ბონუსების სია</h3>
+            <ul>
+                <li>დააკოპირეთ დღის ბონუსების შეტყობინება და ჩასასმელად დააჭირეთ <svg class="icon"><use href="#i-clipboard"/></svg>-ს.</li>
+                <li>აირჩიეთ თქვენი ქალაქი და ბონუსი თავისით განახლდება საათის მიხედვით, იმის ჩვენებით, თუ როდემდე მოქმედებს.</li>
+                <li>სია ინახება დღის ბოლომდე, ქალაქი კი ხვალისთვისაც დამახსოვრდება. ბონუსის აკრეფა ან „ხელით მითითებული ბონუსის“ არჩევა თქვენს ბონუსს დააბრუნებს.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-puzzle"/></svg>ვიჯეტები</h3>
+            <ul>
+                <li>ღილაკი <svg class="icon"><use href="#i-puzzle"/></svg> რთავს საათს, მაღვიძარას, ჩანაწერს და ცას. გადაათრიეთ ისინი სადაც გინდათ და იქ დარჩებიან.</li>
+                <li>დააყენეთ მაღვიძარა გრძელი შესვენებისთვის, მოკლე შესვენებისთვის და ცვლის დასრულებისთვის, და აირჩიეთ ხმა. როცა რეკავს, დაწკაპება ან <kbd>Esc</kbd> აჩერებს მას.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-palette"/></svg>თემები</h3>
+            <ul>
+                <li><svg class="icon"><use href="#i-palette"/></svg> ირჩევს ფერთა თემას, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> ცვლის ნათელ და მუქ რეჟიმს, ხოლო ენის მენიუდან ირჩევთ ენას.</li>
+            </ul>
+        </div>
+        <div class="help-body" lang="hi">
+            <h3><svg class="icon"><use href="#i-calculator"/></svg>दूरी कैलकुलेटर</h3>
+            <ul>
+                <li>दूरी मीटर में डालें, भुगतान नीचे दिखेगा, पूरे शेकेल तक ऊपर की ओर पूर्णांकित।</li>
+                <li>अगर बोनस हो तो उसका प्रतिशत डालें, और पैदल कूरियर के लिए <b>पैदल</b> चालू करें।</li>
+                <li>राशि पर क्लिक करें या <kbd>Enter</kbd> दबाएँ तो वह कॉपी हो जाती है; <kbd>Esc</kbd> साफ़ करता है।</li>
+                <li>शॉर्टकट: <kbd>D</kbd> दूरी, <kbd>B</kbd> बोनस, <kbd>W</kbd> पैदल।</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-clock-late"/></svg>देर से डिलीवरी</h3>
+            <ul>
+                <li>देर से हुई डिलीवरी के लिए ग्राहक का मुआवज़ा। ऊपर के टैब से या <kbd>L</kbd> दबाकर इस पर जाएँ।</li>
+                <li>रेस्टोरेंट या रिटेल चुनें, डिलीवरी कितने मिनट देर से हुई वह डालें, और रेस्टोरेंट के लिए सब कुछ मिलाकर ऑर्डर की कुल राशि भी।</li>
+                <li>अधिकतम मुआवज़ा नीचे दिखता है, पूरे शेकेल तक ऊपर की ओर पूर्णांकित (एक क्रेडिट एक शेकेल है)। सब्सक्राइबर के लिए <b>Wolt+</b> चालू करें।</li>
+                <li>शॉर्टकट: <kbd>M</kbd> मिनट, <kbd>P</kbd> राशि, <kbd>W</kbd> Wolt+, <kbd>T</kbd> रेस्टोरेंट या रिटेल।</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-clipboard"/></svg>बोनस सूची</h3>
+            <ul>
+                <li>आज का बोनस संदेश कॉपी करें, फिर उसे पेस्ट करने के लिए <svg class="icon"><use href="#i-clipboard"/></svg> दबाएँ।</li>
+                <li>अपना शहर चुनें, बोनस घड़ी के साथ अपने आप बदलता है और दिखाता है कि वह कब तक मान्य है।</li>
+                <li>सूची दिन के अंत तक रहती है, और आपका शहर कल के लिए भी याद रहता है। बोनस टाइप करने या “मैनुअल बोनस” चुनने से आपका अपना बोनस वापस आ जाता है।</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-puzzle"/></svg>विजेट</h3>
+            <ul>
+                <li><svg class="icon"><use href="#i-puzzle"/></svg> बटन से घड़ी, अलार्म, नोट और आसमान चालू होते हैं। उन्हें कहीं भी खींचें, वे वहीं रहेंगे।</li>
+                <li>लंबे ब्रेक, छोटे ब्रेक और शिफ़्ट के अंत के लिए अलार्म लगाएँ, और आवाज़ चुनें। जब अलार्म बजे, क्लिक करें या <kbd>Esc</kbd> दबाएँ।</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-palette"/></svg>थीम</h3>
+            <ul>
+                <li><svg class="icon"><use href="#i-palette"/></svg> रंग थीम चुनता है, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> लाइट और डार्क मोड के बीच बदलता है, और भाषा मेन्यू से भाषा चुनें।</li>
             </ul>
         </div>
     </div>
@@ -981,6 +1077,9 @@
 <script>
 const translations = {
     he: {
+        name: 'עברית',
+        dir: 'rtl',
+        locale: 'he-IL',
         title: 'מחשבון סאפורט',
         tabDistance: 'מרחק',
         tabDelay: 'דליברי לייט',
@@ -998,7 +1097,7 @@ const translations = {
         manualBonus: 'בונוס ידני',
         citiesFound: n => `נמצאו ${n} ערים · תקף עד סוף היום`,
         noBonuses: 'לא נמצאה רשימת בונוסים בטקסט שהועתק',
-        until: 'עד',
+        until: 'עד {time}',
         walker: 'ווקר',
         hint: '<kbd>Enter</kbd> או לחיצה להעתקה · <kbd>Esc</kbd> לניקוי',
         copied: 'הועתק ✓',
@@ -1020,7 +1119,7 @@ const translations = {
         alarmLong: 'ארוכה',
         alarmShort: 'קצרה',
         alarmEnd: 'ירידה',
-        nextIn: 'בעוד',
+        nextIn: 'בעוד {time}',
         soundBeep: 'צפצוף',
         soundChime: 'פעמון',
         soundSiren: 'סירנה',
@@ -1032,9 +1131,12 @@ const translations = {
         stop: 'עצירה',
         help: 'עזרה',
         helpTitle: 'איך משתמשים',
-        otherLang: 'English'
+        language: 'שפה'
     },
     en: {
+        name: 'English',
+        dir: 'ltr',
+        locale: 'en-GB',
         title: 'Support Calculator',
         tabDistance: 'Distance',
         tabDelay: 'Delivery Late',
@@ -1052,7 +1154,7 @@ const translations = {
         manualBonus: 'Manual bonus',
         citiesFound: n => `${n} cities found · valid until end of day`,
         noBonuses: 'No bonus list found in the copied text',
-        until: 'until',
+        until: 'until {time}',
         walker: 'Walker',
         hint: '<kbd>Enter</kbd> or click to copy · <kbd>Esc</kbd> to clear',
         copied: 'Copied ✓',
@@ -1074,7 +1176,7 @@ const translations = {
         alarmLong: 'Long',
         alarmShort: 'Short',
         alarmEnd: 'Ending',
-        nextIn: 'in',
+        nextIn: 'in {time}',
         soundBeep: 'Beep',
         soundChime: 'Chime',
         soundSiren: 'Siren',
@@ -1086,7 +1188,178 @@ const translations = {
         stop: 'Stop',
         help: 'Help',
         helpTitle: 'How to use',
-        otherLang: 'עברית'
+        language: 'Language'
+    },
+    ar: {
+        name: 'عربي',
+        dir: 'rtl',
+        locale: 'ar-PS-u-nu-latn',
+        title: 'حاسبة السبورت',
+        tabDistance: 'مسافة',
+        tabDelay: 'تأخير التوصيل',
+        restaurant: 'مطعم',
+        retail: 'متجر',
+        minutesLate: 'دقايق تأخير',
+        orderTotal: '₪ الطلب',
+        woltPlus: 'Wolt+',
+        deliveryFee: 'رسوم التوصيل',
+        needPrice: 'اكتبوا مبلغ الطلب',
+        meters: 'متر',
+        bonus: '% بونص',
+        pasteList: 'لزق قائمة البونصات المنسوخة',
+        pastePrompt: 'الزقوا قائمة البونصات:',
+        manualBonus: 'بونص يدوي',
+        citiesFound: n => `عدد المدن: ${n} · صالحة لآخر اليوم`,
+        noBonuses: 'ما لقينا قائمة بونصات بالنص اللي نسختوه',
+        until: 'لحد {time}',
+        walker: 'ووكر',
+        hint: '<kbd>Enter</kbd> أو كبسة للنسخ · <kbd>Esc</kbd> للمسح',
+        copied: 'انتسخ ✓',
+        tooShort: 'أقل مسافة 10 متر',
+        copyFailed: 'ما زبط النسخ',
+        lightMode: 'وضع فاتح',
+        darkMode: 'وضع غامق',
+        credit: 'معمول بـ{heart} من عميت كوهين وClaude',
+        palette: 'الألوان',
+        classic: 'كلاسيك',
+        cute: 'كيوت',
+        sunset: 'غروب',
+        ocean: 'بحر',
+        aurora: 'شفق',
+        cyber: 'سايبربانك',
+        widgets: 'ويدجتات',
+        clock: 'ساعة',
+        alarm: 'منبّه',
+        alarmLong: 'طويلة',
+        alarmShort: 'قصيرة',
+        alarmEnd: 'نهاية الشفت',
+        nextIn: 'بعد {time}',
+        soundBeep: 'بيب',
+        soundChime: 'جرس',
+        soundSiren: 'صفّارة',
+        soundMeow: 'مياو',
+        note: 'ملاحظة',
+        sky: 'السما',
+        notePlaceholder: 'اكتبوا إشي…',
+        close: 'سكّر',
+        stop: 'وقّف',
+        help: 'مساعدة',
+        helpTitle: 'كيف تستعملوه',
+        language: 'اللغة'
+    },
+    ka: {
+        name: 'ქართული',
+        dir: 'ltr',
+        locale: 'ka-GE',
+        title: 'მხარდაჭერის კალკულატორი',
+        tabDistance: 'მანძილი',
+        tabDelay: 'დაგვიანება',
+        restaurant: 'რესტორანი',
+        retail: 'მაღაზია',
+        minutesLate: 'წთ დაგვიანება',
+        orderTotal: '₪ შეკვეთა',
+        woltPlus: 'Wolt+',
+        deliveryFee: 'მიწოდების საფასური',
+        needPrice: 'შეიყვანეთ შეკვეთის თანხა',
+        meters: 'მეტრი',
+        bonus: '% ბონუსი',
+        pasteList: 'დაკოპირებული ბონუსების სიის ჩასმა',
+        pastePrompt: 'ჩასვით ბონუსების სია:',
+        manualBonus: 'ხელით მითითებული ბონუსი',
+        citiesFound: n => `ნაპოვნია ${n} ქალაქი · მოქმედებს დღის ბოლომდე`,
+        noBonuses: 'დაკოპირებულ ტექსტში ბონუსების სია ვერ მოიძებნა',
+        until: '{time}-მდე',
+        walker: 'ფეხით',
+        hint: '<kbd>Enter</kbd> ან დაწკაპება — კოპირება · <kbd>Esc</kbd> — წაშლა',
+        copied: 'დაკოპირდა ✓',
+        tooShort: 'მინიმალური მანძილი 10 მეტრია',
+        copyFailed: 'კოპირება ვერ მოხერხდა',
+        lightMode: 'ნათელი რეჟიმი',
+        darkMode: 'მუქი რეჟიმი',
+        credit: 'შექმნილია {heart}-ით ამიტ კოენისა და Claude-ის მიერ',
+        palette: 'თემა',
+        classic: 'კლასიკური',
+        cute: 'საყვარელი',
+        sunset: 'მზის ჩასვლა',
+        ocean: 'ოკეანე',
+        aurora: 'ავრორა',
+        cyber: 'კიბერპანკი',
+        widgets: 'ვიჯეტები',
+        clock: 'საათი',
+        alarm: 'მაღვიძარა',
+        alarmLong: 'გრძელი',
+        alarmShort: 'მოკლე',
+        alarmEnd: 'დასრულება',
+        nextIn: '{time}-ში',
+        soundBeep: 'ბიპი',
+        soundChime: 'ზარი',
+        soundSiren: 'სირენა',
+        soundMeow: 'მიაუ',
+        note: 'ჩანაწერი',
+        sky: 'ცა',
+        notePlaceholder: 'დაწერეთ რამე…',
+        close: 'დახურვა',
+        stop: 'გაჩერება',
+        help: 'დახმარება',
+        helpTitle: 'როგორ გამოვიყენოთ',
+        language: 'ენა'
+    },
+    hi: {
+        name: 'हिन्दी',
+        dir: 'ltr',
+        locale: 'hi-IN',
+        title: 'सपोर्ट कैलकुलेटर',
+        tabDistance: 'दूरी',
+        tabDelay: 'देर से डिलीवरी',
+        restaurant: 'रेस्टोरेंट',
+        retail: 'रिटेल',
+        minutesLate: 'मिनट देर',
+        orderTotal: '₪ ऑर्डर',
+        woltPlus: 'Wolt+',
+        deliveryFee: 'डिलीवरी शुल्क',
+        needPrice: 'ऑर्डर की कुल राशि डालें',
+        meters: 'मीटर',
+        bonus: '% बोनस',
+        pasteList: 'कॉपी की गई बोनस सूची पेस्ट करें',
+        pastePrompt: 'बोनस सूची पेस्ट करें:',
+        manualBonus: 'मैनुअल बोनस',
+        citiesFound: n => `${n} शहर मिले · दिन के अंत तक मान्य`,
+        noBonuses: 'कॉपी किए गए टेक्स्ट में कोई बोनस सूची नहीं मिली',
+        until: '{time} तक',
+        walker: 'पैदल',
+        hint: 'कॉपी के लिए <kbd>Enter</kbd> या क्लिक · साफ़ करने के लिए <kbd>Esc</kbd>',
+        copied: 'कॉपी हो गया ✓',
+        tooShort: 'न्यूनतम दूरी 10 मीटर है',
+        copyFailed: 'कॉपी नहीं हो सका',
+        lightMode: 'लाइट मोड',
+        darkMode: 'डार्क मोड',
+        credit: 'अमित कोहेन और Claude ने {heart} से बनाया',
+        palette: 'थीम',
+        classic: 'क्लासिक',
+        cute: 'क्यूट',
+        sunset: 'सूर्यास्त',
+        ocean: 'समुद्र',
+        aurora: 'ऑरोरा',
+        cyber: 'साइबरपंक',
+        widgets: 'विजेट',
+        clock: 'घड़ी',
+        alarm: 'अलार्म',
+        alarmLong: 'लंबा ब्रेक',
+        alarmShort: 'छोटा ब्रेक',
+        alarmEnd: 'शिफ़्ट का अंत',
+        nextIn: '{time} में',
+        soundBeep: 'बीप',
+        soundChime: 'घंटी',
+        soundSiren: 'सायरन',
+        soundMeow: 'म्याऊँ',
+        note: 'नोट',
+        sky: 'आसमान',
+        notePlaceholder: 'कुछ लिखें…',
+        close: 'बंद करें',
+        stop: 'रोकें',
+        help: 'मदद',
+        helpTitle: 'कैसे इस्तेमाल करें',
+        language: 'भाषा'
     }
 };
 
@@ -1098,7 +1371,7 @@ const store = {
     set(k, v) { try { localStorage.setItem(k, v); } catch {} }
 };
 
-let lang = store.get('lang') === 'en' ? 'en' : 'he';
+let lang = translations[store.get('lang')] ? store.get('lang') : 'he';
 let calc = store.get('calc') === 'delay' ? 'delay' : 'distance';   // which calculator is shown
 let orderType = store.get('orderType') === 'retail' ? 'retail' : 'restaurant';
 let current = null;      // amount currently shown, or null if none
@@ -1107,9 +1380,11 @@ let captionTimer = null;
 function applyLanguage() {
     const t = translations[lang];
     document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+    document.documentElement.dir = t.dir;
     document.title = $('title').textContent = t.title;
-    $('lang').textContent = t.otherLang;
+    $('lang').value = lang;
+    $('lang').title = t.language;
+    $('lang').setAttribute('aria-label', t.language);
     $('metersLabel').textContent = t.meters;
     $('bonusLabel').textContent = t.bonus;
     $('walkerLabel').textContent = t.walker;
@@ -1323,8 +1598,12 @@ for (const [button, menu] of Object.entries(MENUS)) {
 document.addEventListener('pointerdown', e => {
     if (!e.target.closest('.menu, #widgetsBtn, #paletteBtn')) closeMenus();
 });
-$('lang').addEventListener('click', () => {
-    lang = lang === 'he' ? 'en' : 'he';
+// Each language listed in its own name
+for (const [code, t] of Object.entries(translations)) {
+    $('lang').add(Object.assign(new Option(t.name, code), { lang: code }));
+}
+$('lang').addEventListener('change', () => {
+    lang = $('lang').value;
     store.set('lang', lang);
     applyLanguage();
 });
@@ -1349,7 +1628,7 @@ document.addEventListener('keydown', e => {
         if (busy) return;
     }
     // Let widgets (e.g. the note) take typing without triggering shortcuts
-    if (e.target.closest('.widget, .menu, #alarmOverlay')) return;
+    if (e.target.closest('.widget, .menu, #alarmOverlay, #lang')) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -1711,8 +1990,9 @@ function updateNextAlarm(now) {
         ? `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`
         : `${Math.floor(s / 60)}:${pad(s % 60)}`;
     $('nextAlarm').innerHTML = '';
-    $('nextAlarm').append(`${t[next.row.querySelector('[data-t]').dataset.t]} ${t.nextIn} `,
-        Object.assign(document.createElement('bdi'), { textContent: left }));
+    const [before, after] = t.nextIn.split('{time}');
+    $('nextAlarm').append(`${t[next.row.querySelector('[data-t]').dataset.t]} ${before}`,
+        Object.assign(document.createElement('bdi'), { textContent: left }), after);
 }
 
 // Wolt courier on a scooter, Pokémon Emerald style: pixel art, one
@@ -1976,7 +2256,7 @@ function tick() {
     if (widgets.sky.on) drawSky(now);
     if (widgets.clock.on) {
         $('clockTime').textContent = `${hm}:${pad(now.getSeconds())}`;
-        $('clockDate').textContent = now.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB',
+        $('clockDate').textContent = now.toLocaleDateString(translations[lang].locale,
             { weekday: 'long', day: 'numeric', month: 'short' });
     }
     // Ring alarms whose time passed since the last check, even if a
@@ -2093,7 +2373,7 @@ function updateBonus() {
         if ($('bonus').value !== value) { $('bonus').value = value; render(); }
         // When the bonus next changes
         const next = city.slots.flatMap(s => [s.from, s.to]).filter(m => m > minute && m < 24 * 60).sort((a, b) => a - b)[0];
-        info = `${percent}%` + (next ? ` ${t.until} ${formatTime(next)}` : '');
+        info = `${percent}%` + (next ? ` ${t.until.replace('{time}', formatTime(next))}` : '');
     } else if ($('bonus').value !== (store.get('bonus') || '') && document.activeElement !== $('bonus')) {
         $('bonus').value = store.get('bonus') || '';
         render();
