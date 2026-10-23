@@ -2501,7 +2501,13 @@ async function checkForUpdate() {
         // Offline - try again later
     }
 }
-$('updateBtn').addEventListener('click', () => location.reload());
+// A reload refetches the page but may keep cached scripts for up to 10
+// minutes, so refresh the cached copies first to avoid mixing versions.
+$('updateBtn').addEventListener('click', async () => {
+    const scripts = [...document.scripts].filter(s => s.src).map(s => s.src);
+    await Promise.all(scripts.map(src => fetch(src, { cache: 'reload' }).catch(() => {})));
+    location.reload();
+});
 document.addEventListener('visibilitychange', checkForUpdate);
 setInterval(checkForUpdate, 10 * 60000);
 checkForUpdate();
