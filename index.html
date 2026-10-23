@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>מחשבון סאפורט</title>
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="icon" href="icon-512.png" type="image/png" sizes="512x512">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="theme-color" content="#009DE0">
 <script>
     // Apply the saved palette and mode before first paint to avoid a flash.
@@ -1491,7 +1491,7 @@ function unlockAudio() {
 let meowBuffer = null;
 let meowLoading = null;
 function loadMeow() {
-    meowLoading ??= fetch('meow.mp3')
+    meowLoading ??= fetch('assets/meow.mp3')
         .then(r => r.arrayBuffer())
         .then(data => audio.decodeAudioData(data))
         .then(buffer => { meowBuffer = buffer; })
