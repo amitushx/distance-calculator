@@ -1063,6 +1063,30 @@
         padding: 12px 24px 16px;
         background: var(--card);
     }
+    /* Settings backup at the bottom of the help */
+    .backup { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .backup h3 { display: flex; align-items: center; gap: 6px; color: var(--accent); font-size: 14px; font-weight: 500; }
+    .backup p { margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+    .backup-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .backup-actions button {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: none;
+        color: var(--accent);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .backup-actions button:hover { background: var(--accent-soft); }
+    .backup-actions .icon { width: 16px; height: 16px; }
+    #backupMsg:empty { display: none; }
+    #backupMsg { color: var(--accent); }
+
     #changelogBtn {
         display: flex;
         align-items: center;
@@ -1118,6 +1142,9 @@
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4v12"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 9l5 -5l5 5"/><path d="M12 4v12"/></symbol>
+    <symbol id="i-floppy" viewBox="0 0 24 24"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M14 4v4h-6v-4"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/></symbol>
 </svg>
 <main>
@@ -1436,6 +1463,16 @@
                 <li><svg class="icon"><use href="#i-palette"/></svg> रंग थीम चुनता है, <svg class="icon"><use href="#i-moon"/></svg>/<svg class="icon"><use href="#i-sun"/></svg> लाइट और डार्क मोड के बीच बदलता है, और भाषा मेन्यू से भाषा चुनें।</li>
             </ul>
         </div>
+        <section class="backup">
+            <h3><svg class="icon"><use href="#i-floppy"/></svg><span data-t="backup"></span></h3>
+            <p data-t="backupNote"></p>
+            <div class="backup-actions">
+                <button id="exportBtn" type="button"><svg class="icon"><use href="#i-download"/></svg><span data-t="exportSettings"></span></button>
+                <button id="importBtn" type="button"><svg class="icon"><use href="#i-upload"/></svg><span data-t="importSettings"></span></button>
+                <input id="importFile" type="file" accept=".json,application/json" hidden>
+            </div>
+            <p id="backupMsg" role="status"></p>
+        </section>
     </div>
 </dialog>
 <dialog id="news" aria-labelledby="newsTitle">
@@ -1603,6 +1640,11 @@ const translations = {
         refresh: 'רענון',
         whatsNew: 'מה חדש',
         changelog: 'כל השינויים',
+        backup: 'גיבוי הגדרות',
+        backupNote: 'שומרים לקובץ את ערכת הצבעים, השפה, הווידג׳טים (כולל הפתק והשעון המעורר) וההעדפות, ומעלים אותו במחשב אחר. היסטוריית החישובים ורשימת הבונוסים לא נכללות.',
+        exportSettings: 'ייצוא',
+        importSettings: 'ייבוא',
+        importFailed: 'הקובץ הזה לא נראה כמו גיבוי הגדרות',
         version: 'גרסה'
     },
     en: {
@@ -1683,6 +1725,11 @@ const translations = {
         refresh: 'Refresh',
         whatsNew: 'What’s new',
         changelog: 'Full change log',
+        backup: 'Settings backup',
+        backupNote: 'Save your theme, language, widgets (with the note and alarms) and preferences to a file, and load it on another computer. The calculation history and the bonus list aren’t included.',
+        exportSettings: 'Export',
+        importSettings: 'Import',
+        importFailed: 'This file doesn’t look like a settings backup',
         version: 'Version'
     },
     ar: {
@@ -1763,6 +1810,11 @@ const translations = {
         refresh: 'تحديث',
         whatsNew: 'شو الجديد',
         changelog: 'كل التغييرات',
+        backup: 'نسخة احتياطية للإعدادات',
+        backupNote: 'احفظوا الثيم، اللغة، الويدجتات (مع الملاحظة والمنبّه) والتفضيلات بملف، وحمّلوه على كمبيوتر تاني. سجل الحسابات وقائمة البونصات مش مشمولين.',
+        exportSettings: 'تصدير',
+        importSettings: 'استيراد',
+        importFailed: 'هالملف مش باين إنه نسخة احتياطية للإعدادات',
         version: 'نسخة'
     },
     ka: {
@@ -1843,6 +1895,11 @@ const translations = {
         refresh: 'განახლება',
         whatsNew: 'რა არის ახალი',
         changelog: 'ცვლილებების სრული სია',
+        backup: 'პარამეტრების სარეზერვო ასლი',
+        backupNote: 'შეინახეთ თემა, ენა, ვიჯეტები (ჩანაწერით და მაღვიძარათი) და პარამეტრები ფაილში და ჩატვირთეთ სხვა კომპიუტერზე. გამოთვლების ისტორია და ბონუსების სია არ შედის.',
+        exportSettings: 'ექსპორტი',
+        importSettings: 'იმპორტი',
+        importFailed: 'ეს ფაილი პარამეტრების სარეზერვო ასლს არ ჰგავს',
         version: 'ვერსია'
     },
     hi: {
@@ -1923,6 +1980,11 @@ const translations = {
         refresh: 'रीफ़्रेश करें',
         whatsNew: 'नया क्या है',
         changelog: 'पूरी बदलाव सूची',
+        backup: 'सेटिंग्स बैकअप',
+        backupNote: 'अपनी थीम, भाषा, विजेट (नोट और अलार्म समेत) और पसंद एक फ़ाइल में सहेजें, और उसे दूसरे कंप्यूटर पर लोड करें। हिसाब का इतिहास और बोनस सूची शामिल नहीं हैं।',
+        exportSettings: 'निर्यात',
+        importSettings: 'आयात',
+        importFailed: 'यह फ़ाइल सेटिंग्स बैकअप जैसी नहीं लगती',
         version: 'वर्ज़न'
     }
 };
@@ -2338,6 +2400,45 @@ $('changelogBtn').addEventListener('click', () => openNews(true));
 $('newsClose').addEventListener('click', () => $('news').close());
 $('news').addEventListener('click', e => { if (e.target === $('news')) $('news').close(); });
 $('news').addEventListener('close', () => firstField().focus());
+
+// Settings backup: the saved settings as a JSON file, to carry to another
+// computer. The calculation history and the day's bonus list stay behind.
+const SETTINGS_KEYS = ['lang', 'theme', 'palette', 'calc', 'orderType', 'bonus', 'bonusCity',
+    'widgets', 'cat', 'historyAll', 'historyOpen'];
+const BACKUP_APP = 'support-calculator';
+$('exportBtn').addEventListener('click', () => {
+    const settings = {};
+    for (const key of SETTINGS_KEYS) {
+        const value = store.get(key);
+        if (value !== null) settings[key] = value;
+    }
+    const file = new Blob([JSON.stringify({ app: BACKUP_APP, version: VERSION, settings }, null, 2)],
+        { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = `support-calculator-settings-${todayKey()}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);   // once the download has its copy
+});
+$('importBtn').addEventListener('click', () => $('importFile').click());
+$('importFile').addEventListener('change', async () => {
+    const file = $('importFile').files[0];
+    $('importFile').value = '';   // the same file can be picked again
+    if (!file) return;
+    try {
+        const backup = JSON.parse(await file.text());
+        if (backup?.app !== BACKUP_APP || typeof backup.settings !== 'object') throw new Error();
+        // Only known keys, and only text, as they were saved
+        for (const key of SETTINGS_KEYS) {
+            const value = backup.settings[key];
+            if (typeof value === 'string') store.set(key, value);
+        }
+        location.reload();
+    } catch {
+        $('backupMsg').textContent = translations[lang].importFailed;
+        setTimeout(() => { $('backupMsg').textContent = ''; }, 4000);
+    }
+});
 
 document.addEventListener('keydown', e => {
     // Dialogs handle their own keys (Escape closes them)
