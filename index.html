@@ -3846,25 +3846,28 @@ document.addEventListener('pointerdown', requestWakeLock);
 document.addEventListener('keydown', requestWakeLock);
 requestWakeLock();
 
-// New version: GitHub Pages stamps every file with the deploy time, so a
-// page newer than the one running means a push landed, whichever file it
-// changed. Offer a refresh rather than reloading under the user.
-const loadedAt = Date.parse(document.lastModified);
+// New version: the newest release in the deployed changelog.js against
+// the one running. Comparing version numbers, not deploy times, means only
+// a real release offers a refresh: a deploy that didn't bump the version,
+// or a page served from the browser's or GitHub's 10-minute cache, can't.
+// The check skips the browser's cache; GitHub's may still answer for up to
+// 10 minutes after a release, which only delays the offer. Offer a refresh
+// rather than reloading under the user.
 async function checkForUpdate() {
     if (document.visibilityState !== 'visible' || !$('update').hidden) return;
     try {
-        const res = await fetch(location.href, { method: 'HEAD', cache: 'no-store' });
-        const deployedAt = Date.parse(res.headers.get('last-modified'));
-        if (deployedAt > loadedAt) $('update').hidden = false;
+        const res = await fetch(`changelog.js?check=${Date.now()}`, { cache: 'no-store' });
+        const deployed = (await res.text()).match(/version:\s*'(\d+\.\d+\.\d+)'/)?.[1];
+        if (deployed && isNewer(deployed, VERSION)) $('update').hidden = false;
     } catch {
         // Offline - try again later
     }
 }
-// A reload refetches the page but may keep cached scripts for up to 10
-// minutes, so refresh the cached copies first to avoid mixing versions.
+// A reload may keep the cached page and scripts for up to 10 minutes, so
+// refresh the cached copies first to avoid landing on the old version.
 $('updateBtn').addEventListener('click', async () => {
-    const scripts = [...document.scripts].filter(s => s.src).map(s => s.src);
-    await Promise.all(scripts.map(src => fetch(src, { cache: 'reload' }).catch(() => {})));
+    const files = [location.href, ...[...document.scripts].filter(s => s.src).map(s => s.src)];
+    await Promise.all(files.map(src => fetch(src, { cache: 'reload' }).catch(() => {})));
     location.reload();
 });
 document.addEventListener('visibilitychange', checkForUpdate);

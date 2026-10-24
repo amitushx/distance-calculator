@@ -3,6 +3,17 @@
 // window shows it once to everyone who ran an older version.
 const CHANGELOG = [
     {
+        version: '1.9.1',
+        date: '2026-10-24',
+        notes: {
+            he: ['ההודעה ״יש גרסה חדשה״ מופיעה עכשיו רק כשבאמת יוצאת גרסה חדשה.'],
+            en: ['The “A new version is available” message now shows only when there really is a new version.'],
+            ar: ['رسالة «في نسخة جديدة» صارت تبيّن بس لما يكون في فعلاً نسخة جديدة.'],
+            ka: ['შეტყობინება „ხელმისაწვდომია ახალი ვერსია“ ახლა მხოლოდ მაშინ ჩანს, როცა ახალი ვერსია მართლაც გამოდის.'],
+            hi: ['“नया वर्ज़न उपलब्ध है” संदेश अब तभी दिखता है जब सच में नया वर्ज़न आया हो।']
+        }
+    },
+    {
         version: '1.9.0',
         date: '2026-10-24',
         notes: {
