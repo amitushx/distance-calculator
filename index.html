@@ -503,6 +503,52 @@
     #amount.words { font-size: 34px; line-height: 56px; }   /* "Delivery Fee" instead of a sum */
     #caption { display: block; margin-top: 10px; font-size: 13px; opacity: .8; }
 
+    /* Recent calculations under the result; a row copies its amount */
+    #history { margin-top: 18px; }
+    #history[hidden] { display: none; }
+    .history-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+        font-size: 12px;
+        color: var(--muted);
+    }
+    .history-head .tools { display: flex; align-items: center; gap: 10px; }
+    .history-head button {
+        display: inline-flex;
+        padding: 0;
+        border: none;
+        background: none;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+    }
+    .history-head button:hover { color: var(--accent); }
+    .history-head .icon { width: 14px; height: 14px; }
+    #historyList { list-style: none; }
+    #historyList button {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: baseline;
+        gap: 10px;
+        width: 100%;
+        padding: 5px 8px;
+        border: none;
+        border-radius: 8px;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        text-align: start;
+        cursor: pointer;
+    }
+    #historyList button:hover { background: var(--accent-soft); }
+    #historyList button:disabled { cursor: default; background: none; }
+    #historyList time { font-variant-numeric: tabular-nums; }
+    #historyList .detail { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    #historyList .sum { color: var(--accent); font-weight: 500; font-variant-numeric: tabular-nums; }
+
     footer { font-size: 12px; color: var(--muted); }
     footer .icon { width: 14px; height: 14px; color: var(--accent); vertical-align: -2px; }
 
@@ -890,6 +936,7 @@
     <symbol id="i-maximize" viewBox="0 0 24 24"><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/></symbol>
 </svg>
 <main>
@@ -979,6 +1026,16 @@
         <span id="amount" dir="ltr">—</span>
         <span id="caption"></span>
     </button>
+    <section id="history" hidden>
+        <div class="history-head">
+            <span><svg class="icon"><use href="#i-history"/></svg> <span data-t="history"></span></span>
+            <span class="tools">
+                <button id="historyMore" type="button"></button>
+                <button id="historyClear" type="button"><svg class="icon"><use href="#i-trash"/></svg></button>
+            </span>
+        </div>
+        <ul id="historyList"></ul>
+    </section>
 </main>
 <footer id="credit"><span id="creditText"></span> · <button id="versionBtn" type="button" aria-haspopup="dialog" dir="ltr"></button></footer>
 <div id="road" aria-hidden="true" hidden><canvas id="courier"></canvas></div>
@@ -1012,6 +1069,11 @@
                 <li>הפיצוי המקסימלי מופיע למטה, מעוגל כלפי מעלה לשקל שלם (קרדיט אחד הוא שקל). הפעילו <b>וולט פלוס</b> ללקוחות המנוי.</li>
                 <li>קיצורים: <kbd>M</kbd> דקות, <kbd>P</kbd> סכום, <kbd>W</kbd> וולט פלוס, <kbd>T</kbd> מסעדה או ריטייל.</li>
             </ul>
+            <h3><svg class="icon"><use href="#i-history"/></svg>היסטוריה</h3>
+            <ul>
+                <li>10 החישובים האחרונים מופיעים מתחת לסכום: כל חישוב שהועתק, או שנשאר על המסך כמה שניות. מוצגים 5, ו״הצגת עוד״ פותח את כל ה־10.</li>
+                <li>לחיצה על שורה מעתיקה שוב את הסכום שלה, ו־<svg class="icon"><use href="#i-trash"/></svg> מנקה את הרשימה.</li>
+            </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>רשימת הבונוסים</h3>
             <ul>
                 <li>העתיקו את הודעת הבונוסים של היום, ולחצו על <svg class="icon"><use href="#i-clipboard"/></svg> כדי להדביק אותה.</li>
@@ -1043,6 +1105,11 @@
                 <li>Pick Restaurant or Retail, type how many minutes late the delivery was, and for restaurants the order total with everything included.</li>
                 <li>The maximum compensation shows below, rounded up to a whole shekel (one credit is one shekel). Turn on <b>Wolt+</b> for subscribers.</li>
                 <li>Shortcuts: <kbd>M</kbd> minutes, <kbd>P</kbd> price, <kbd>W</kbd> Wolt+, <kbd>T</kbd> restaurant or retail.</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-history"/></svg>History</h3>
+            <ul>
+                <li>Your last 10 calculations show under the amount: each one you copied, or that stayed on screen for a few seconds. 5 show at first, and “Show more” opens all 10.</li>
+                <li>Click a row to copy its amount again; <svg class="icon"><use href="#i-trash"/></svg> clears the list.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>The bonus list</h3>
             <ul>
@@ -1076,6 +1143,11 @@
                 <li>أعلى تعويض بيطلع تحت، مدوّر لفوق لأقرب شيكل (كل كريديت بشيكل). شغّلوا <b>Wolt+</b> للزباين المشتركين.</li>
                 <li>اختصارات: <kbd>M</kbd> دقايق، <kbd>P</kbd> مبلغ، <kbd>W</kbd> Wolt+، <kbd>T</kbd> مطعم أو متجر.</li>
             </ul>
+            <h3><svg class="icon"><use href="#i-history"/></svg>السجل</h3>
+            <ul>
+                <li>آخر 10 حسابات بتبيّن تحت المبلغ: كل حساب نسختوه، أو ضل عالشاشة كم ثانية. بيبيّن 5، و«عرض أكتر» بيفتح كل الـ10.</li>
+                <li>كبسة على سطر بتنسخ مبلغه مرة تانية، و <svg class="icon"><use href="#i-trash"/></svg> بيمسح القائمة.</li>
+            </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>قائمة البونصات</h3>
             <ul>
                 <li>انسخوا رسالة بونصات اليوم، وبعدين اكبسوا على <svg class="icon"><use href="#i-clipboard"/></svg> عشان تلزقوها.</li>
@@ -1108,6 +1180,11 @@
                 <li>მაქსიმალური კომპენსაცია ქვემოთ ჩანს, მთელ შეკელამდე ზემოთ დამრგვალებული (ერთი კრედიტი ერთი შეკელია). გამომწერებისთვის ჩართეთ <b>Wolt+</b>.</li>
                 <li>მალსახმობები: <kbd>M</kbd> წუთები, <kbd>P</kbd> თანხა, <kbd>W</kbd> Wolt+, <kbd>T</kbd> რესტორანი ან მაღაზია.</li>
             </ul>
+            <h3><svg class="icon"><use href="#i-history"/></svg>ისტორია</h3>
+            <ul>
+                <li>ბოლო 10 გამოთვლა თანხის ქვემოთ ჩანს: ყველა, რომელიც დააკოპირეთ, ან რამდენიმე წამი ეკრანზე დარჩა. ჯერ 5 ჩანს, ხოლო „მეტის ჩვენება“ ყველა 10-ს ხსნის.</li>
+                <li>სტრიქონზე დაწკაპება მის თანხას ისევ აკოპირებს, ხოლო <svg class="icon"><use href="#i-trash"/></svg> სიას ასუფთავებს.</li>
+            </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>ბონუსების სია</h3>
             <ul>
                 <li>დააკოპირეთ დღის ბონუსების შეტყობინება და ჩასასმელად დააჭირეთ <svg class="icon"><use href="#i-clipboard"/></svg>-ს.</li>
@@ -1139,6 +1216,11 @@
                 <li>रेस्टोरेंट या रिटेल चुनें, डिलीवरी कितने मिनट देर से हुई वह डालें, और रेस्टोरेंट के लिए सब कुछ मिलाकर ऑर्डर की कुल राशि भी।</li>
                 <li>अधिकतम मुआवज़ा नीचे दिखता है, पूरे शेकेल तक ऊपर की ओर पूर्णांकित (एक क्रेडिट एक शेकेल है)। सब्सक्राइबर के लिए <b>Wolt+</b> चालू करें।</li>
                 <li>शॉर्टकट: <kbd>M</kbd> मिनट, <kbd>P</kbd> राशि, <kbd>W</kbd> Wolt+, <kbd>T</kbd> रेस्टोरेंट या रिटेल।</li>
+            </ul>
+            <h3><svg class="icon"><use href="#i-history"/></svg>इतिहास</h3>
+            <ul>
+                <li>आपके आख़िरी 10 हिसाब रकम के नीचे दिखते हैं: हर वह जो आपने कॉपी किया, या जो कुछ सेकंड स्क्रीन पर रहा। पहले 5 दिखते हैं, और “और दिखाएँ” सभी 10 खोलता है।</li>
+                <li>किसी पंक्ति पर क्लिक करने से उसकी रकम फिर कॉपी होती है; <svg class="icon"><use href="#i-trash"/></svg> सूची मिटाता है।</li>
             </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>बोनस सूची</h3>
             <ul>
@@ -1263,6 +1345,11 @@ const translations = {
         walker: 'ווקר',
         hint: '<kbd>Enter</kbd> או לחיצה להעתקה · <kbd>Esc</kbd> לניקוי',
         copied: 'הועתק ✓',
+        history: 'אחרונים',
+        showMore: 'הצגת עוד',
+        showLess: 'הצגת פחות',
+        clearHistory: 'ניקוי ההיסטוריה',
+        minShort: 'דק׳',
         tooShort: 'מרחק מינימלי 101 מטר',
         copyFailed: 'לא ניתן להעתיק',
         lightMode: 'מצב בהיר',
@@ -1330,6 +1417,11 @@ const translations = {
         walker: 'Walker',
         hint: '<kbd>Enter</kbd> or click to copy · <kbd>Esc</kbd> to clear',
         copied: 'Copied ✓',
+        history: 'Recent',
+        showMore: 'Show more',
+        showLess: 'Show less',
+        clearHistory: 'Clear history',
+        minShort: 'min',
         tooShort: 'Minimum distance is 101 meters',
         copyFailed: 'Could not copy',
         lightMode: 'Light mode',
@@ -1397,6 +1489,11 @@ const translations = {
         walker: 'ووكر',
         hint: '<kbd>Enter</kbd> أو كبسة للنسخ · <kbd>Esc</kbd> للمسح',
         copied: 'انتسخ ✓',
+        history: 'آخر الحسابات',
+        showMore: 'عرض أكتر',
+        showLess: 'عرض أقل',
+        clearHistory: 'مسح السجل',
+        minShort: 'د',
         tooShort: 'أقل مسافة 101 متر',
         copyFailed: 'ما زبط النسخ',
         lightMode: 'وضع فاتح',
@@ -1464,6 +1561,11 @@ const translations = {
         walker: 'ფეხით',
         hint: '<kbd>Enter</kbd> ან დაწკაპება — კოპირება · <kbd>Esc</kbd> — წაშლა',
         copied: 'დაკოპირდა ✓',
+        history: 'ბოლო გამოთვლები',
+        showMore: 'მეტის ჩვენება',
+        showLess: 'ნაკლების ჩვენება',
+        clearHistory: 'ისტორიის წაშლა',
+        minShort: 'წთ',
         tooShort: 'მინიმალური მანძილი 101 მეტრია',
         copyFailed: 'კოპირება ვერ მოხერხდა',
         lightMode: 'ნათელი რეჟიმი',
@@ -1531,6 +1633,11 @@ const translations = {
         walker: 'पैदल',
         hint: 'कॉपी के लिए <kbd>Enter</kbd> या क्लिक · साफ़ करने के लिए <kbd>Esc</kbd>',
         copied: 'कॉपी हो गया ✓',
+        history: 'हाल के हिसाब',
+        showMore: 'और दिखाएँ',
+        showLess: 'कम दिखाएँ',
+        clearHistory: 'इतिहास मिटाएँ',
+        minShort: 'मिनट',
         tooShort: 'न्यूनतम दूरी 101 मीटर है',
         copyFailed: 'कॉपी नहीं हो सका',
         lightMode: 'लाइट मोड',
@@ -1620,6 +1727,7 @@ function applyLanguage() {
     if ($('news').open) renderNews();
     document.querySelectorAll('.help-body').forEach(el => { el.hidden = el.lang !== lang; });
     translateWidgets();
+    renderHistory();
     updateThemeButton();
     fillCitySelect();
     render();
@@ -1643,7 +1751,91 @@ function render() {
     if (calc === 'delay') renderDelay();
     else renderDistance();
     $('result').disabled = current === null && !$('amount').classList.contains('words');
+    // A result left unchanged for a moment goes into the history
+    clearTimeout(historyTimer);
+    if (!$('result').disabled) historyTimer = setTimeout(addHistory, 3000);
 }
+
+// Recent calculations, newest first: the inputs (shown in the current
+// language) and the amount, or 'deliveryFee'. 10 are kept, 5 shown
+// unless expanded.
+const HISTORY_MAX = 10, HISTORY_SHORT = 5;
+let calcHistory = [];
+try { calcHistory = JSON.parse(store.get('history')) || []; } catch {}
+let historyAll = store.get('historyAll') === '1';
+let historyTimer = null;
+
+function historyEntry() {
+    const amount = $('amount').classList.contains('words') ? 'deliveryFee' : current;
+    if (amount === null) return null;
+    if (calc === 'delay') {
+        const retail = orderType === 'retail';
+        const minutes = Number($('minutes').value);
+        return { calc, minutes, retail, woltPlus: $('woltPlus').checked,
+            price: needsPrice(minutes, retail) ? Number($('price').value) : null, amount };
+    }
+    return { calc, meters: Number($('distance').value), walker: $('walker').checked,
+        bonus: Math.max(Number($('bonus').value) || 0, 0), amount };
+}
+function addHistory() {
+    clearTimeout(historyTimer);
+    const entry = historyEntry();
+    if (!entry) return;
+    const same = calcHistory[0] && JSON.stringify({ ...calcHistory[0], at: 0 }) === JSON.stringify({ ...entry, at: 0 });
+    if (same) return;
+    calcHistory.unshift({ ...entry, at: Date.now() });
+    calcHistory.length = Math.min(calcHistory.length, HISTORY_MAX);
+    store.set('history', JSON.stringify(calcHistory));
+    renderHistory();
+}
+function historyDetail(e, t) {
+    const parts = e.calc === 'delay'
+        ? [`${e.minutes} ${t.minShort}`, t[e.retail ? 'retail' : 'restaurant'],
+            e.price !== null && `₪${e.price}`, e.woltPlus && t.woltPlus]
+        : [`${e.meters} ${t.meters}`, e.bonus > 0 && `+${e.bonus}%`, e.walker && t.walker];
+    return parts.filter(Boolean).join(' · ');
+}
+function renderHistory() {
+    const t = translations[lang];
+    $('history').hidden = !calcHistory.length;
+    $('historyMore').hidden = calcHistory.length <= HISTORY_SHORT;
+    $('historyMore').textContent = historyAll ? t.showLess : t.showMore;
+    $('historyClear').title = t.clearHistory;
+    const today = new Date().toDateString();
+    $('historyList').replaceChildren(...calcHistory.slice(0, historyAll ? HISTORY_MAX : HISTORY_SHORT).map(e => {
+        const at = new Date(e.at);
+        const time = at.toLocaleTimeString(t.locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+        const when = at.toDateString() === today ? time
+            : `${at.toLocaleDateString(t.locale, { day: 'numeric', month: 'numeric' })} ${time}`;
+        const li = document.createElement('li');
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.disabled = e.amount === 'deliveryFee';
+        b.innerHTML = '<time dir="ltr"></time><span class="detail"></span><span class="sum" dir="ltr"></span>';
+        b.querySelector('time').textContent = when;
+        b.querySelector('.detail').textContent = historyDetail(e, t);
+        const sum = b.querySelector('.sum');
+        sum.textContent = e.amount === 'deliveryFee' ? t.deliveryFee : `₪${e.amount}`;
+        b.addEventListener('click', () => {
+            copyText(String(e.amount)).then(() => { sum.textContent = t.copied; }, () => { sum.textContent = t.copyFailed; })
+                .finally(() => setTimeout(() => { sum.textContent = `₪${e.amount}`; }, 1500));
+            firstField().focus();
+        });
+        li.append(b);
+        return li;
+    }));
+}
+$('historyMore').addEventListener('click', () => {
+    historyAll = !historyAll;
+    store.set('historyAll', historyAll ? '1' : '0');
+    renderHistory();
+});
+$('historyClear').addEventListener('click', () => {
+    calcHistory = [];
+    store.set('history', '[]');
+    renderHistory();
+    firstField().focus();
+});
 
 function renderDistance() {
     const t = translations[lang];
@@ -1730,15 +1922,18 @@ function legacyCopy(text) {
     return ok ? Promise.resolve() : Promise.reject();
 }
 
+function copyText(text) {
+    return navigator.clipboard
+        ? navigator.clipboard.writeText(text).catch(() => legacyCopy(text))
+        : legacyCopy(text);
+}
+
 // Copy the numeric amount only (no ₪ sign)
 function copyAmount() {
     if (current === null) return;
     const t = translations[lang];
-    const text = String(current);
-    const write = navigator.clipboard
-        ? navigator.clipboard.writeText(text).catch(() => legacyCopy(text))
-        : legacyCopy(text);
-    write.then(
+    addHistory();
+    copyText(String(current)).then(
         () => { $('caption').textContent = t.copied; },
         () => { $('caption').textContent = t.copyFailed; }
     ).finally(() => {
