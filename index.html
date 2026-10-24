@@ -283,7 +283,7 @@
         stroke-linejoin: round;
         vertical-align: middle;
     }
-    #widgetsBtn, #paletteBtn, #theme {
+    #historyBtn, #widgetsBtn, #paletteBtn, #theme {
         display: grid;
         padding: 0;
         border: none;
@@ -292,7 +292,7 @@
         cursor: pointer;
         transition: color .15s;
     }
-    #widgetsBtn:hover, #paletteBtn:hover, #theme:hover,
+    #historyBtn:hover, #widgetsBtn:hover, #paletteBtn:hover, #theme:hover, #historyBtn[aria-expanded="true"],
     #widgetsBtn[aria-expanded="true"], #paletteBtn[aria-expanded="true"] { color: var(--accent); }
 
     /* Segmented switches: which calculator, and the order type */
@@ -524,9 +524,11 @@
         font: inherit;
         cursor: pointer;
     }
+    .history-head button[hidden] { display: none; }
     .history-head button:hover { color: var(--accent); }
     .history-head .icon { width: 14px; height: 14px; }
     #historyList { list-style: none; }
+    #historyEmpty { padding: 5px 8px; font-size: 13px; color: var(--muted); }
     #historyList button {
         display: grid;
         grid-template-columns: auto 1fr auto;
@@ -943,6 +945,7 @@
     <header>
         <h1 id="title"></h1>
         <div class="actions">
+            <button id="historyBtn" type="button" aria-expanded="false" aria-controls="history"><svg class="icon"><use href="#i-history"/></svg></button>
             <button id="widgetsBtn" type="button" aria-expanded="false"><svg class="icon"><use href="#i-puzzle"/></svg></button>
             <button id="paletteBtn" type="button" aria-expanded="false"><svg class="icon"><use href="#i-palette"/></svg></button>
             <button id="theme" type="button"></button>
@@ -1035,6 +1038,7 @@
             </span>
         </div>
         <ul id="historyList"></ul>
+        <p id="historyEmpty" data-t="historyEmpty"></p>
     </section>
 </main>
 <footer id="credit"><span id="creditText"></span> · <button id="versionBtn" type="button" aria-haspopup="dialog" dir="ltr"></button></footer>
@@ -1071,7 +1075,7 @@
             </ul>
             <h3><svg class="icon"><use href="#i-history"/></svg>היסטוריה</h3>
             <ul>
-                <li>10 החישובים האחרונים מופיעים מתחת לסכום: כל חישוב שהועתק, או שנשאר על המסך כמה שניות. מוצגים 5, ו״הצגת עוד״ פותח את כל ה־10.</li>
+                <li><svg class="icon"><use href="#i-history"/></svg> או <kbd>H</kbd> פותחים מתחת לסכום את 10 החישובים האחרונים: כל חישוב שהועתק, או שנשאר על המסך כמה שניות. מוצגים 5, ו״הצגת עוד״ פותח את כל ה־10.</li>
                 <li>לחיצה על שורה מעתיקה שוב את הסכום שלה, ו־<svg class="icon"><use href="#i-trash"/></svg> מנקה את הרשימה.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>רשימת הבונוסים</h3>
@@ -1108,7 +1112,7 @@
             </ul>
             <h3><svg class="icon"><use href="#i-history"/></svg>History</h3>
             <ul>
-                <li>Your last 10 calculations show under the amount: each one you copied, or that stayed on screen for a few seconds. 5 show at first, and “Show more” opens all 10.</li>
+                <li><svg class="icon"><use href="#i-history"/></svg> or <kbd>H</kbd> opens your last 10 calculations under the amount: each one you copied, or that stayed on screen for a few seconds. 5 show at first, and “Show more” opens all 10.</li>
                 <li>Click a row to copy its amount again; <svg class="icon"><use href="#i-trash"/></svg> clears the list.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>The bonus list</h3>
@@ -1145,7 +1149,7 @@
             </ul>
             <h3><svg class="icon"><use href="#i-history"/></svg>السجل</h3>
             <ul>
-                <li>آخر 10 حسابات بتبيّن تحت المبلغ: كل حساب نسختوه، أو ضل عالشاشة كم ثانية. بيبيّن 5، و«عرض أكتر» بيفتح كل الـ10.</li>
+                <li><svg class="icon"><use href="#i-history"/></svg> أو <kbd>H</kbd> بيفتح تحت المبلغ آخر 10 حسابات: كل حساب نسختوه، أو ضل عالشاشة كم ثانية. بيبيّن 5، و«عرض أكتر» بيفتح كل الـ10.</li>
                 <li>كبسة على سطر بتنسخ مبلغه مرة تانية، و <svg class="icon"><use href="#i-trash"/></svg> بيمسح القائمة.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>قائمة البونصات</h3>
@@ -1182,7 +1186,7 @@
             </ul>
             <h3><svg class="icon"><use href="#i-history"/></svg>ისტორია</h3>
             <ul>
-                <li>ბოლო 10 გამოთვლა თანხის ქვემოთ ჩანს: ყველა, რომელიც დააკოპირეთ, ან რამდენიმე წამი ეკრანზე დარჩა. ჯერ 5 ჩანს, ხოლო „მეტის ჩვენება“ ყველა 10-ს ხსნის.</li>
+                <li><svg class="icon"><use href="#i-history"/></svg> ან <kbd>H</kbd> თანხის ქვემოთ ხსნის ბოლო 10 გამოთვლას: ყველა, რომელიც დააკოპირეთ, ან რამდენიმე წამი ეკრანზე დარჩა. ჯერ 5 ჩანს, ხოლო „მეტის ჩვენება“ ყველა 10-ს ხსნის.</li>
                 <li>სტრიქონზე დაწკაპება მის თანხას ისევ აკოპირებს, ხოლო <svg class="icon"><use href="#i-trash"/></svg> სიას ასუფთავებს.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>ბონუსების სია</h3>
@@ -1219,7 +1223,7 @@
             </ul>
             <h3><svg class="icon"><use href="#i-history"/></svg>इतिहास</h3>
             <ul>
-                <li>आपके आख़िरी 10 हिसाब रकम के नीचे दिखते हैं: हर वह जो आपने कॉपी किया, या जो कुछ सेकंड स्क्रीन पर रहा। पहले 5 दिखते हैं, और “और दिखाएँ” सभी 10 खोलता है।</li>
+                <li><svg class="icon"><use href="#i-history"/></svg> या <kbd>H</kbd> रकम के नीचे आपके आख़िरी 10 हिसाब खोलता है: हर वह जो आपने कॉपी किया, या जो कुछ सेकंड स्क्रीन पर रहा। पहले 5 दिखते हैं, और “और दिखाएँ” सभी 10 खोलता है।</li>
                 <li>किसी पंक्ति पर क्लिक करने से उसकी रकम फिर कॉपी होती है; <svg class="icon"><use href="#i-trash"/></svg> सूची मिटाता है।</li>
             </ul>
             <h3><svg class="icon"><use href="#i-clipboard"/></svg>बोनस सूची</h3>
@@ -1346,6 +1350,7 @@ const translations = {
         hint: '<kbd>Enter</kbd> או לחיצה להעתקה · <kbd>Esc</kbd> לניקוי',
         copied: 'הועתק ✓',
         history: 'אחרונים',
+        historyEmpty: 'עוד אין חישובים',
         showMore: 'הצגת עוד',
         showLess: 'הצגת פחות',
         clearHistory: 'ניקוי ההיסטוריה',
@@ -1418,6 +1423,7 @@ const translations = {
         hint: '<kbd>Enter</kbd> or click to copy · <kbd>Esc</kbd> to clear',
         copied: 'Copied ✓',
         history: 'Recent',
+        historyEmpty: 'No calculations yet',
         showMore: 'Show more',
         showLess: 'Show less',
         clearHistory: 'Clear history',
@@ -1490,6 +1496,7 @@ const translations = {
         hint: '<kbd>Enter</kbd> أو كبسة للنسخ · <kbd>Esc</kbd> للمسح',
         copied: 'انتسخ ✓',
         history: 'آخر الحسابات',
+        historyEmpty: 'لسا ما في حسابات',
         showMore: 'عرض أكتر',
         showLess: 'عرض أقل',
         clearHistory: 'مسح السجل',
@@ -1562,6 +1569,7 @@ const translations = {
         hint: '<kbd>Enter</kbd> ან დაწკაპება — კოპირება · <kbd>Esc</kbd> — წაშლა',
         copied: 'დაკოპირდა ✓',
         history: 'ბოლო გამოთვლები',
+        historyEmpty: 'ჯერ გამოთვლები არ არის',
         showMore: 'მეტის ჩვენება',
         showLess: 'ნაკლების ჩვენება',
         clearHistory: 'ისტორიის წაშლა',
@@ -1634,6 +1642,7 @@ const translations = {
         hint: 'कॉपी के लिए <kbd>Enter</kbd> या क्लिक · साफ़ करने के लिए <kbd>Esc</kbd>',
         copied: 'कॉपी हो गया ✓',
         history: 'हाल के हिसाब',
+        historyEmpty: 'अभी कोई हिसाब नहीं',
         showMore: 'और दिखाएँ',
         showLess: 'कम दिखाएँ',
         clearHistory: 'इतिहास मिटाएँ',
@@ -1763,6 +1772,7 @@ const HISTORY_MAX = 10, HISTORY_SHORT = 5;
 let calcHistory = [];
 try { calcHistory = JSON.parse(store.get('history')) || []; } catch {}
 let historyAll = store.get('historyAll') === '1';
+let historyOpen = store.get('historyOpen') === '1';   // closed until the header button opens it
 let historyTimer = null;
 
 function historyEntry() {
@@ -1797,7 +1807,11 @@ function historyDetail(e, t) {
 }
 function renderHistory() {
     const t = translations[lang];
-    $('history').hidden = !calcHistory.length;
+    $('history').hidden = !historyOpen;
+    $('historyBtn').setAttribute('aria-expanded', String(historyOpen));
+    $('historyBtn').title = t.history;
+    $('historyEmpty').hidden = calcHistory.length > 0;
+    $('historyClear').hidden = !calcHistory.length;
     $('historyMore').hidden = calcHistory.length <= HISTORY_SHORT;
     $('historyMore').textContent = historyAll ? t.showLess : t.showMore;
     $('historyClear').title = t.clearHistory;
@@ -1825,6 +1839,12 @@ function renderHistory() {
         return li;
     }));
 }
+function toggleHistory() {
+    historyOpen = !historyOpen;
+    store.set('historyOpen', historyOpen ? '1' : '0');
+    renderHistory();
+}
+$('historyBtn').addEventListener('click', toggleHistory);
 $('historyMore').addEventListener('click', () => {
     historyAll = !historyAll;
     store.set('historyAll', historyAll ? '1' : '0');
@@ -2102,6 +2122,9 @@ document.addEventListener('keydown', e => {
         }
         render();
         firstField().focus();
+    } else if (e.code === 'KeyH') {
+        e.preventDefault();
+        toggleHistory();
     } else if (e.code === 'KeyL') {   // physical key, works on Hebrew layout too
         e.preventDefault();
         setCalc(calc === 'delay' ? 'distance' : 'delay');
