@@ -42,31 +42,32 @@
      * --backdrop is the page background, --panel the cards on top of it
      * (see-through on gradients), --card a solid surface color.
      */
+    /* Classic: white and Wolt blue, and a deep night version */
     :root {
         --backdrop: #ffffff;
-        --bg: #f4f4f5;
+        --bg: #f2f9fd;
         --card: #ffffff;
         --panel: var(--card);
-        --text: #18181b;
-        --muted: #71717a;
-        --line: #e4e4e7;
-        --accent: #0d9488;
-        --accent-soft: #e3f4f2;
-        --shadow: 0 10px 30px rgba(0, 0, 0, .06);
-        --radius: 20px;
+        --text: #202125;
+        --muted: #6c7075;
+        --line: #e4eef4;
+        --accent: #009de0;
+        --accent-soft: #e2f4fc;
+        --shadow: 0 12px 32px rgba(0, 157, 224, .12);
+        --radius: 24px;
         --heart: '';
         --scheme: light;
     }
     :root[data-mode="dark"] {
-        --backdrop: #000000;
-        --bg: #0a0a0a;
-        --card: #141414;
+        --backdrop: #0a1117;
+        --bg: #0f1a22;
+        --card: #142029;
         --panel: var(--card);
-        --text: #ececea;
-        --muted: #85857f;
-        --line: #2a2a2a;
-        --accent: #2dd4bf;
-        --accent-soft: #12302b;
+        --text: #f2f7fa;
+        --muted: #8a9aa6;
+        --line: #20303c;
+        --accent: #1fb4f0;
+        --accent-soft: #0f3346;
         --shadow: none;
         --scheme: dark;
     }
@@ -223,31 +224,6 @@
         background: repeating-linear-gradient(rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px);
     }
 
-    /* Wolt classic: white and Wolt blue, and a deep night version */
-    :root[data-palette="wolt"] {
-        --backdrop: #ffffff;
-        --bg: #f2f9fd;
-        --card: #ffffff;
-        --text: #202125;
-        --muted: #6c7075;
-        --line: #e4eef4;
-        --accent: #009de0;
-        --accent-soft: #e2f4fc;
-        --shadow: 0 12px 32px rgba(0, 157, 224, .12);
-        --radius: 24px;
-    }
-    :root[data-palette="wolt"][data-mode="dark"] {
-        --backdrop: #0a1117;
-        --bg: #0f1a22;
-        --card: #142029;
-        --text: #f2f7fa;
-        --muted: #8a9aa6;
-        --line: #20303c;
-        --accent: #1fb4f0;
-        --accent-soft: #0f3346;
-        --shadow: none;
-    }
-
     /* Retro terminal: green-bar printer paper by day, a green phosphor
        screen by night, in a pixel font for digits and Latin letters
        (Hebrew and the other scripts keep Rubik, which reads better than
@@ -340,8 +316,10 @@
     @media (max-width: 360px) { main { padding: 20px; } }
     header {
         display: flex;
+        flex-wrap: wrap;   /* the buttons drop below a title too long to fit, as in Georgian on phones */
         justify-content: space-between;
         align-items: center;
+        gap: 12px;
         margin-bottom: 28px;
     }
     h1 { font-size: 15px; font-weight: 500; color: var(--muted); }
@@ -1152,13 +1130,12 @@
             <button id="theme" type="button"></button>
             <select id="lang"></select>
             <div id="paletteMenu" class="menu" role="menu" hidden>
-                <button type="button" role="menuitemradio" data-palette="classic"><span class="swatch"><i style="background: #ffffff"></i><i style="background: #000000"></i></span><span data-t="classic"></span></button>
+                <button type="button" role="menuitemradio" data-palette="classic"><span class="swatch"><i style="background: linear-gradient(#ffffff, #cdeefc)"></i><i style="background: linear-gradient(#0a1117, #009de0)"></i></span><span data-t="classic"></span></button>
                 <button type="button" role="menuitemradio" data-palette="cute"><span class="swatch"><i style="background: #ffd3e6"></i><i style="background: #261620"></i></span><span data-t="cute"></span></button>
                 <button type="button" role="menuitemradio" data-palette="sunset"><span class="swatch"><i style="background: linear-gradient(#ffecd2, #fcb69f)"></i><i style="background: linear-gradient(#5a1f2b, #8a3b1c)"></i></span><span data-t="sunset"></span></button>
                 <button type="button" role="menuitemradio" data-palette="ocean"><span class="swatch"><i style="background: linear-gradient(#e0f2fe, #c7d2fe)"></i><i style="background: linear-gradient(#0f2027, #2c5364)"></i></span><span data-t="ocean"></span></button>
                 <button type="button" role="menuitemradio" data-palette="aurora"><span class="swatch"><i style="background: linear-gradient(#e0c3fc, #8ec5fc)"></i><i style="background: linear-gradient(#2a1458, #0d4a4a)"></i></span><span data-t="aurora"></span></button>
                 <button type="button" role="menuitemradio" data-palette="cyber"><span class="swatch"><i style="background: linear-gradient(#f7dcff, #c9f4ff)"></i><i style="background: linear-gradient(#ff2bd6, #00f0ff)"></i></span><span data-t="cyber"></span></button>
-                <button type="button" role="menuitemradio" data-palette="wolt"><span class="swatch"><i style="background: linear-gradient(#ffffff, #cdeefc)"></i><i style="background: linear-gradient(#0a1117, #009de0)"></i></span><span data-t="wolt"></span></button>
                 <button type="button" role="menuitemradio" data-palette="retro"><span class="swatch"><i style="background: repeating-linear-gradient(#f6f8ee 0 4px, #d5e8c9 4px 8px)"></i><i style="background: radial-gradient(#39ff6a 0 2px, #031807 3px)"></i></span><span data-t="retro"></span></button>
             </div>
             <div id="widgetMenu" class="menu" hidden>
@@ -1591,7 +1568,6 @@ const translations = {
         ocean: 'אוקיינוס',
         aurora: 'זוהר',
         cyber: 'סייברפאנק',
-        wolt: 'וולט קלאסי',
         retro: 'טרמינל רטרו',
         widgets: 'ווידג׳טים',
         clock: 'שעון',
@@ -1672,7 +1648,6 @@ const translations = {
         ocean: 'Ocean',
         aurora: 'Aurora',
         cyber: 'Cyberpunk',
-        wolt: 'Wolt classic',
         retro: 'Retro terminal',
         widgets: 'Widgets',
         clock: 'Clock',
@@ -1753,7 +1728,6 @@ const translations = {
         ocean: 'بحر',
         aurora: 'شفق',
         cyber: 'سايبربانك',
-        wolt: 'وولت كلاسيك',
         retro: 'تيرمينال ريترو',
         widgets: 'ويدجتات',
         clock: 'ساعة',
@@ -1834,7 +1808,6 @@ const translations = {
         ocean: 'ოკეანე',
         aurora: 'ავრორა',
         cyber: 'კიბერპანკი',
-        wolt: 'Wolt კლასიკური',
         retro: 'რეტრო ტერმინალი',
         widgets: 'ვიჯეტები',
         clock: 'საათი',
@@ -1915,7 +1888,6 @@ const translations = {
         ocean: 'समुद्र',
         aurora: 'ऑरोरा',
         cyber: 'साइबरपंक',
-        wolt: 'वोल्ट क्लासिक',
         retro: 'रेट्रो टर्मिनल',
         widgets: 'विजेट',
         clock: 'घड़ी',
