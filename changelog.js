@@ -3,6 +3,17 @@
 // window shows it once to everyone who ran an older version.
 const CHANGELOG = [
     {
+        version: '1.8.1',
+        date: '2026-10-24',
+        notes: {
+            he: ['החתול מיילל פעם אחת בכל לחיצה, ולא מיילל שוב על עצמו כשלוחצים כמה פעמים ברצף.'],
+            en: ['The cat meows once per click, and no longer meows over itself when clicked several times in a row.'],
+            ar: ['البسّة بتنوّي مرة وحدة بكل كبسة، وما عادت تنوّي فوق حالها لما تكبسوا كم مرة ورا بعض.'],
+            ka: ['კატა ყოველ დაწკაპებაზე ერთხელ კნავის და აღარ კნავის საკუთარ თავზე ზედიზედ რამდენჯერმე დაწკაპებისას.'],
+            hi: ['बिल्ली हर क्लिक पर एक बार म्याऊँ करती है, और लगातार कई बार क्लिक करने पर अब अपने ऊपर म्याऊँ नहीं करती।']
+        }
+    },
+    {
         version: '1.8.0',
         date: '2026-10-24',
         notes: {

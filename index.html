@@ -3378,16 +3378,26 @@ function catSleep() {
         return catAlone() ? 3000 : elapsed > 25000 ? false : 3000;
     });
 }
+// Just the first meow of meow.mp3 (the alarm plays them all), and none
+// over it while it's still playing however often the cat is clicked
+const MEOW_LENGTH = 1;   // seconds; the first meow ends at 0.9
+let catMeowing = false;
 function catMeow() {
+    if (catMeowing) return;
+    catMeowing = true;
     unlockAudio();
     loadMeow().then(() => {
-        if (!meowBuffer) return;
+        if (!meowBuffer) return (catMeowing = false);
         const src = audio.createBufferSource();
         const gain = audio.createGain();
-        gain.gain.value = .6;
+        const at = audio.currentTime;
+        gain.gain.setValueAtTime(.6, at);
+        gain.gain.setValueAtTime(.6, at + MEOW_LENGTH - .1);
+        gain.gain.linearRampToValueAtTime(0, at + MEOW_LENGTH);   // no click at the cut
         src.buffer = meowBuffer;
         src.connect(gain).connect(audio.destination);
-        src.start();
+        src.onended = () => { catMeowing = false; };
+        src.start(at, 0, MEOW_LENGTH);
     });
 }
 catEl.addEventListener('click', () => {
