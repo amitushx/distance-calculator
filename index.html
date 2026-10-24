@@ -968,7 +968,7 @@
         <div class="help-body" lang="he">
             <h3><svg class="icon"><use href="#i-calculator"/></svg>מחשבון מרחק</h3>
             <ul>
-                <li>הקלידו את המרחק במטרים, והתשלום יופיע למטה, מעוגל לשקל השלם הקרוב.</li>
+                <li>הקלידו את המרחק במטרים, והתשלום יופיע למטה, מעוגל כלפי מעלה לשקל שלם.</li>
                 <li>הוסיפו אחוז בונוס אם יש, והפעילו <b>ווקר</b> לשליחים רגליים.</li>
                 <li>לחיצה על הסכום או <kbd>Enter</kbd> מעתיקים אותו, ו־<kbd>Esc</kbd> מנקה.</li>
                 <li>קיצורים: <kbd>D</kbd> מרחק, <kbd>B</kbd> בונוס, <kbd>W</kbd> ווקר.</li>
@@ -999,7 +999,7 @@
         <div class="help-body" lang="en">
             <h3><svg class="icon"><use href="#i-calculator"/></svg>Distance calculator</h3>
             <ul>
-                <li>Type the distance in meters and the payment shows below, rounded to the nearest shekel.</li>
+                <li>Type the distance in meters and the payment shows below, rounded up to a whole shekel.</li>
                 <li>Add a bonus percentage if there is one, and turn on <b>Walker</b> for couriers on foot.</li>
                 <li>Click the amount or press <kbd>Enter</kbd> to copy it; <kbd>Esc</kbd> clears.</li>
                 <li>Shortcuts: <kbd>D</kbd> distance, <kbd>B</kbd> bonus, <kbd>W</kbd> walker.</li>
@@ -1030,7 +1030,7 @@
         <div class="help-body" lang="ar">
             <h3><svg class="icon"><use href="#i-calculator"/></svg>حاسبة المسافة</h3>
             <ul>
-                <li>اكتبوا المسافة بالمتر، والدفعة بتطلع تحت، مدوّرة لأقرب شيكل.</li>
+                <li>اكتبوا المسافة بالمتر، والدفعة بتطلع تحت، مدوّرة لفوق لأقرب شيكل.</li>
                 <li>زيدوا نسبة البونص إذا في، وشغّلوا <b>ووكر</b> للمراسلين اللي ماشيين على رجليهم.</li>
                 <li>كبسة على المبلغ أو <kbd>Enter</kbd> بتنسخه، و<kbd>Esc</kbd> بيمسح.</li>
                 <li>اختصارات: <kbd>D</kbd> مسافة، <kbd>B</kbd> بونص، <kbd>W</kbd> ووكر.</li>
@@ -1061,7 +1061,7 @@
         <div class="help-body" lang="ka">
             <h3><svg class="icon"><use href="#i-calculator"/></svg>მანძილის კალკულატორი</h3>
             <ul>
-                <li>შეიყვანეთ მანძილი მეტრებში და გადასახადი ქვემოთ გამოჩნდება, უახლოეს მთელ შეკელამდე დამრგვალებული.</li>
+                <li>შეიყვანეთ მანძილი მეტრებში და გადასახადი ქვემოთ გამოჩნდება, მთელ შეკელამდე ზემოთ დამრგვალებული.</li>
                 <li>დაამატეთ ბონუსის პროცენტი, თუ არის, და ფეხით მოსიარულე კურიერებისთვის ჩართეთ <b>ფეხით</b>.</li>
                 <li>თანხაზე დაწკაპება ან <kbd>Enter</kbd> მას აკოპირებს, <kbd>Esc</kbd> კი ასუფთავებს.</li>
                 <li>მალსახმობები: <kbd>D</kbd> მანძილი, <kbd>B</kbd> ბონუსი, <kbd>W</kbd> ფეხით.</li>
@@ -1092,7 +1092,7 @@
         <div class="help-body" lang="hi">
             <h3><svg class="icon"><use href="#i-calculator"/></svg>दूरी कैलकुलेटर</h3>
             <ul>
-                <li>दूरी मीटर में डालें, भुगतान नीचे दिखेगा, निकटतम पूरे शेकेल तक पूर्णांकित।</li>
+                <li>दूरी मीटर में डालें, भुगतान नीचे दिखेगा, ऊपर की ओर पूरे शेकेल तक पूर्णांकित।</li>
                 <li>अगर बोनस हो तो उसका प्रतिशत डालें, और पैदल कूरियर के लिए <b>पैदल</b> चालू करें।</li>
                 <li>राशि पर क्लिक करें या <kbd>Enter</kbd> दबाएँ तो वह कॉपी हो जाती है; <kbd>Esc</kbd> साफ़ करता है।</li>
                 <li>शॉर्टकट: <kbd>D</kbd> दूरी, <kbd>B</kbd> बोनस, <kbd>W</kbd> पैदल।</li>
@@ -1215,7 +1215,7 @@ const translations = {
         walker: 'ווקר',
         hint: '<kbd>Enter</kbd> או לחיצה להעתקה · <kbd>Esc</kbd> לניקוי',
         copied: 'הועתק ✓',
-        tooShort: 'מרחק מינימלי 10 מטר',
+        tooShort: 'מרחק מינימלי 101 מטר',
         copyFailed: 'לא ניתן להעתיק',
         lightMode: 'מצב בהיר',
         darkMode: 'מצב כהה',
@@ -1277,7 +1277,7 @@ const translations = {
         walker: 'Walker',
         hint: '<kbd>Enter</kbd> or click to copy · <kbd>Esc</kbd> to clear',
         copied: 'Copied ✓',
-        tooShort: 'Minimum distance is 10 meters',
+        tooShort: 'Minimum distance is 101 meters',
         copyFailed: 'Could not copy',
         lightMode: 'Light mode',
         darkMode: 'Dark mode',
@@ -1339,7 +1339,7 @@ const translations = {
         walker: 'ووكر',
         hint: '<kbd>Enter</kbd> أو كبسة للنسخ · <kbd>Esc</kbd> للمسح',
         copied: 'انتسخ ✓',
-        tooShort: 'أقل مسافة 10 متر',
+        tooShort: 'أقل مسافة 101 متر',
         copyFailed: 'ما زبط النسخ',
         lightMode: 'وضع فاتح',
         darkMode: 'وضع غامق',
@@ -1401,7 +1401,7 @@ const translations = {
         walker: 'ფეხით',
         hint: '<kbd>Enter</kbd> ან დაწკაპება — კოპირება · <kbd>Esc</kbd> — წაშლა',
         copied: 'დაკოპირდა ✓',
-        tooShort: 'მინიმალური მანძილი 10 მეტრია',
+        tooShort: 'მინიმალური მანძილი 101 მეტრია',
         copyFailed: 'კოპირება ვერ მოხერხდა',
         lightMode: 'ნათელი რეჟიმი',
         darkMode: 'მუქი რეჟიმი',
@@ -1463,7 +1463,7 @@ const translations = {
         walker: 'पैदल',
         hint: 'कॉपी के लिए <kbd>Enter</kbd> या क्लिक · साफ़ करने के लिए <kbd>Esc</kbd>',
         copied: 'कॉपी हो गया ✓',
-        tooShort: 'न्यूनतम दूरी 10 मीटर है',
+        tooShort: 'न्यूनतम दूरी 101 मीटर है',
         copyFailed: 'कॉपी नहीं हो सका',
         lightMode: 'लाइट मोड',
         darkMode: 'डार्क मोड',
@@ -1578,7 +1578,7 @@ function renderDistance() {
     const meters = Number(raw);
     const bonus = Math.max(Number($('bonus').value) || 0, 0);
 
-    if (raw === '' || !(meters >= 10)) {
+    if (raw === '' || !(meters >= 101)) {
         current = null;
         $('amount').textContent = '—';
         $('caption').textContent = raw === '' ? ' ' : t.tooShort;

@@ -6,14 +6,15 @@
 
 // Per-100m rates (in agorot) for non-walkers, by distance band.
 const BANDS = [
-    { from: 100,  to: 1000,     rate: 55 },
-    { from: 1000, to: 3000,     rate: 35 },
-    { from: 3000, to: 5000,     rate: 30 },
-    { from: 5000, to: Infinity, rate: 20 }
+    { from: 200,  to: 1100,     rate: 55 },
+    { from: 1100, to: 3100,     rate: 35 },
+    { from: 3100, to: 5100,     rate: 30 },
+    { from: 5100, to: Infinity, rate: 20 }
 ];
 
 // Base fee in agorot for bicycle / motorcycle / car.
-// 3 ILS up to 100m, then each started 100m within a band adds that band's rate.
+// 3 ILS up to 200m, then each started 100m within a band adds that band's rate,
+// so 101-200m pays 3 ILS, 201-300m pays 3.55, and so on (matches the original calculator).
 function riderFee(m) {
     let fee = 300;
     for (const b of BANDS) {
@@ -30,13 +31,13 @@ function walkerFee(m) {
     return Math.min(700 + Math.ceil((m - 100) / 50) * 100, 1600);
 }
 
-// Final payment rounded to the nearest whole shekel (halves up), including bonus percentage.
+// Final payment rounded up to a whole shekel, including bonus percentage.
 function payment(meters, bonusPercent = 0, walker = false) {
     const base = walker ? walkerFee(meters) : riderFee(meters);
     // base * (100 + bonus) is in units of 1/10000 ILS; round away float noise
     // from fractional bonuses before dividing so exact integers stay exact.
     const units = Math.round(base * (100 + bonusPercent) * 100);
-    return Math.floor((units + 500000) / 1e6);
+    return Math.ceil(units / 1e6);
 }
 
 if (typeof module !== 'undefined') module.exports = { riderFee, walkerFee, payment };

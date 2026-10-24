@@ -3,6 +3,17 @@
 // window shows it once to everyone who ran an older version.
 const CHANGELOG = [
     {
+        version: '1.0.1',
+        date: '2026-10-24',
+        notes: {
+            he: ['תשלום המרחק תואם עכשיו את המחשבון המקורי, מעוגל כלפי מעלה לשקל שלם. המרחק המינימלי הוא 101 מטר.'],
+            en: ['The distance payment now matches the original calculator, rounded up to a whole shekel. The minimum distance is now 101 meters.'],
+            ar: ['دفعة المسافة صارت زي الحاسبة الأصلية، مدوّرة لفوق لأقرب شيكل. أقل مسافة صارت 101 متر.'],
+            ka: ['მანძილის გადასახადი ახლა ემთხვევა ორიგინალ კალკულატორს, მთელ შეკელამდე ზემოთ დამრგვალებული. მინიმალური მანძილი ახლა 101 მეტრია.'],
+            hi: ['दूरी का भुगतान अब मूल कैलकुलेटर से मेल खाता है, ऊपर की ओर पूरे शेकेल तक पूर्णांकित। न्यूनतम दूरी अब 101 मीटर है।']
+        }
+    },
+    {
         version: '1.0.0',
         date: '2026-10-24',
         notes: {
