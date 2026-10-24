@@ -1,0 +1,96 @@
+<!doctype html>
+<!-- The Doom widget's screen, loaded into an iframe so the engine's
+     globals and window-wide key listeners stay out of the calculator -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    body { display: grid; place-items: center; }
+    /* 320×200 stretched to 4:3, the way it looked on a CRT, as big as fits */
+    canvas {
+        display: block;
+        width: min(100vw, 100vh * 4 / 3) !important;
+        height: min(100vh, 100vw * 3 / 4) !important;
+        outline: none;
+    }
+    #status {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: #888;
+        font: 12px system-ui, sans-serif;
+    }
+</style>
+</head>
+<body>
+<canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+<div id="status">…</div>
+<script>
+// The shareware episode with Cloudflare's doom-wasm build, both on jsDelivr
+const BASE = 'https://cdn.jsdelivr.net/npm/@nicejsisverycool/tizendoom@0.1.6/';
+// The package binds WASD; these are the classic keys (scancodes): arrows,
+// Ctrl fires, Space uses, Alt strafes, Shift runs, comma/period sidestep.
+// The game's own fullscreen key is off since F is ours. Aspect correction
+// stretches the picture to fill the 4:3 canvas instead of leaving a black band.
+const CONFIG = {
+    key_right: 77, key_left: 75, key_up: 72, key_down: 80,
+    key_strafeleft: 51, key_straferight: 52,
+    key_fire: 29, key_use: 57, key_strafe: 56, key_strafe_alt: 56,
+    key_speed: 54, key_speed_alt: 42, key_fullscreen: 0,
+    aspect_ratio_correct: 1,
+};
+const canvas = document.getElementById('canvas');
+const status = document.getElementById('status');
+
+addEventListener('keydown', e => {
+    // Arrows and Space shouldn't scroll anything; F toggles full screen
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+    if (e.code === 'KeyF' && !e.repeat) parent.toggleDoomFull?.();
+}, true);
+addEventListener('pointerdown', () => canvas.focus());
+
+(async () => {
+    let cfg;
+    try {
+        cfg = await (await fetch(BASE + 'default.cfg')).text();
+    } catch {
+        status.textContent = '×';
+        return;
+    }
+    for (const [key, value] of Object.entries(CONFIG)) {
+        const line = new RegExp(`^${key}\\s.*$`, 'm');
+        const set = key.padEnd(30) + value;
+        cfg = line.test(cfg) ? cfg.replace(line, set) : `${cfg}\n${set}`;
+    }
+    window.Module = {
+        noInitialRun: true,
+        canvas,
+        locateFile: path => BASE + path,
+        preRun: [() => {
+            Module.FS.createPreloadedFile('', 'doom1.wad', BASE + 'doom1.wad', true, true);
+            Module.FS.writeFile('default.cfg', cfg);
+        }],
+        onRuntimeInitialized() {
+            status.remove();
+            canvas.focus();
+            callMain(['-iwad', 'doom1.wad', '-window', '-nogui', '-nomusic', '-config', 'default.cfg']);
+        },
+        print: text => console.log(text),
+        printErr: text => console.warn(text),
+        setStatus() {},
+        totalDependencies: 0,
+        monitorRunDependencies(left) {
+            this.totalDependencies = Math.max(this.totalDependencies, left);
+            status.textContent = `${this.totalDependencies - left} / ${this.totalDependencies}`;
+        },
+    };
+    const script = document.createElement('script');
+    script.src = BASE + 'websockets-doom.js';
+    script.onerror = () => { status.textContent = '×'; };
+    document.body.append(script);
+})();
+</script>
+</body>
+</html>

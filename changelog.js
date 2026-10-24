@@ -3,6 +3,17 @@
 // window shows it once to everyone who ran an older version.
 const CHANGELOG = [
     {
+        version: '1.1.0',
+        date: '2026-10-24',
+        notes: {
+            he: ['ווידג׳ט חדש: דום. המשחק יורד (בערך 6.5MB) רק כשלוחצים על הפעלה, ו־F פותח אותו במסך מלא.'],
+            en: ['A new widget: Doom. The game downloads (about 6.5 MB) only when you press play, and F opens it full screen.'],
+            ar: ['ويدجت جديد: دوم. اللعبة بتنزل (حوالي 6.5MB) بس لما تكبسوا تشغيل، و F بيفتحها بملء الشاشة.'],
+            ka: ['ახალი ვიჯეტი: დუმი. თამაში (დაახლოებით 6.5 MB) მხოლოდ გაშვებაზე დაჭერისას ჩამოიტვირთება, ხოლო F მას სრულ ეკრანზე ხსნის.'],
+            hi: ['नया विजेट: डूम। गेम (लगभग 6.5 MB) तभी डाउनलोड होता है जब आप चलाएँ दबाते हैं, और F उसे पूर्ण स्क्रीन में खोलता है।']
+        }
+    },
+    {
         version: '1.0.1',
         date: '2026-10-24',
         notes: {

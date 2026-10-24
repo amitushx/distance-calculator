@@ -594,6 +594,32 @@
         border-radius: 8px;
         image-rendering: pixelated;
     }
+    .widget-bar .tools { display: flex; align-items: center; gap: 8px; }
+    .widget-bar .icon { width: 14px; height: 14px; }
+    #doomScreen {
+        display: grid;
+        place-items: center;
+        width: 320px;
+        height: 240px;
+        margin-top: 4px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #000;
+    }
+    #doomScreen iframe { width: 100%; height: 100%; border: 0; }
+    /* Where real full screen isn't allowed (e.g. inside some apps), fill the window */
+    #w-doom.big {
+        inset: 0 !important;
+        z-index: 89000 !important;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+        cursor: auto;
+    }
+    #w-doom.big #doomScreen { width: auto; height: auto; flex: 1; }
+    #doomPlay { display: flex; align-items: center; gap: 6px; color: #aaa; font-size: 12px; }
+    #doomPlay:hover { color: #fff; }
+    #doomPlay .icon { width: 28px; height: 28px; }
     #noteText {
         display: block;
         width: 180px;
@@ -859,6 +885,8 @@
     <symbol id="i-clock-late" viewBox="0 0 24 24"><path d="M20.986 12.502a9 9 0 1 0 -5.973 7.98"/><path d="M12 7v5l3 3"/><path d="M19 16v3"/><path d="M19 22v.01"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></symbol>
     <symbol id="i-history" viewBox="0 0 24 24"><path d="M12 8v4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></symbol>
+    <symbol id="i-player-play" viewBox="0 0 24 24"><path d="M7 4v16l13 -8z"/></symbol>
+    <symbol id="i-maximize" viewBox="0 0 24 24"><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"/></symbol>
 </svg>
 <main>
@@ -882,6 +910,7 @@
                 <label class="switch"><input type="checkbox" data-widget="alarm"><span class="track"></span><span data-t="alarm"></span></label>
                 <label class="switch"><input type="checkbox" data-widget="note"><span class="track"></span><span data-t="note"></span></label>
                 <label class="switch"><input type="checkbox" data-widget="sky"><span class="track"></span><span data-t="sky"></span></label>
+                <label class="switch"><input type="checkbox" data-widget="doom"><span class="track"></span><span data-t="doom"></span></label>
             </div>
         </div>
     </header>
@@ -988,7 +1017,8 @@
             </ul>
             <h3><svg class="icon"><use href="#i-puzzle"/></svg>ווידג׳טים</h3>
             <ul>
-                <li>מהכפתור <svg class="icon"><use href="#i-puzzle"/></svg> מפעילים שעון, שעון מעורר, פתק ושמיים. גררו אותם לאן שנוח, והם יישארו שם.</li>
+                <li>מהכפתור <svg class="icon"><use href="#i-puzzle"/></svg> מפעילים שעון, שעון מעורר, פתק, שמיים ודום. גררו אותם לאן שנוח, והם יישארו שם.</li>
+                <li>בדום, <svg class="icon"><use href="#i-player-play"/></svg> מוריד את המשחק (בערך 6.5MB) רק כשלוחצים עליו. החיצים זזים, <kbd>Ctrl</kbd> יורה, <kbd>רווח</kbd> פותח דלתות, ו־<kbd>F</kbd> או <svg class="icon"><use href="#i-maximize"/></svg> למסך מלא.</li>
                 <li>בשעון המעורר קובעים שעה להפסקה ארוכה, להפסקה קצרה ולירידה מהמשמרת, ובוחרים צליל. כשהוא מצלצל, לחיצה או <kbd>Esc</kbd> עוצרים אותו.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-palette"/></svg>ערכות צבעים</h3>
@@ -1019,7 +1049,8 @@
             </ul>
             <h3><svg class="icon"><use href="#i-puzzle"/></svg>Widgets</h3>
             <ul>
-                <li>The <svg class="icon"><use href="#i-puzzle"/></svg> button turns on a clock, alarms, a note and the sky. Drag them anywhere and they stay put.</li>
+                <li>The <svg class="icon"><use href="#i-puzzle"/></svg> button turns on a clock, alarms, a note, the sky and Doom. Drag them anywhere and they stay put.</li>
+                <li>Doom downloads the game (about 6.5 MB) only when you press <svg class="icon"><use href="#i-player-play"/></svg>. Arrows move, <kbd>Ctrl</kbd> fires, <kbd>Space</kbd> opens doors, and <kbd>F</kbd> or <svg class="icon"><use href="#i-maximize"/></svg> goes full screen.</li>
                 <li>Set alarms for the long break, the short break and the end of the shift, and pick a sound. When one rings, click or press <kbd>Esc</kbd> to stop it.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-palette"/></svg>Themes</h3>
@@ -1050,7 +1081,8 @@
             </ul>
             <h3><svg class="icon"><use href="#i-puzzle"/></svg>ويدجتات</h3>
             <ul>
-                <li>من الزر <svg class="icon"><use href="#i-puzzle"/></svg> بتشغّلوا ساعة، منبّه، ملاحظة والسما. اسحبوهم وين ما بدكم، وبضلّوا هناك.</li>
+                <li>من الزر <svg class="icon"><use href="#i-puzzle"/></svg> بتشغّلوا ساعة، منبّه، ملاحظة، السما ودوم. اسحبوهم وين ما بدكم، وبضلّوا هناك.</li>
+                <li>بدوم، <svg class="icon"><use href="#i-player-play"/></svg> بينزّل اللعبة (حوالي 6.5MB) بس لما تكبسوا عليه. الأسهم للحركة، <kbd>Ctrl</kbd> بيطخّ، <kbd>Space</kbd> بيفتح البواب، و<kbd>F</kbd> أو <svg class="icon"><use href="#i-maximize"/></svg> لملء الشاشة.</li>
                 <li>بالمنبّه بتحددوا ساعة للاستراحة الطويلة، للاستراحة القصيرة ولنهاية الشفت، وبتختاروا صوت. لما يرنّ، كبسة أو <kbd>Esc</kbd> بتوقفه.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-palette"/></svg>الألوان</h3>
@@ -1081,7 +1113,8 @@
             </ul>
             <h3><svg class="icon"><use href="#i-puzzle"/></svg>ვიჯეტები</h3>
             <ul>
-                <li>ღილაკი <svg class="icon"><use href="#i-puzzle"/></svg> რთავს საათს, მაღვიძარას, ჩანაწერს და ცას. გადაათრიეთ ისინი სადაც გინდათ და იქ დარჩებიან.</li>
+                <li>ღილაკი <svg class="icon"><use href="#i-puzzle"/></svg> რთავს საათს, მაღვიძარას, ჩანაწერს, ცას და დუმს. გადაათრიეთ ისინი სადაც გინდათ და იქ დარჩებიან.</li>
+                <li>დუმი თამაშს (დაახლოებით 6.5 MB) მხოლოდ <svg class="icon"><use href="#i-player-play"/></svg>-ზე დაჭერისას ჩამოტვირთავს. ისრები გადაადგილებისთვისაა, <kbd>Ctrl</kbd> ისვრის, <kbd>Space</kbd> კარებს აღებს, ხოლო <kbd>F</kbd> ან <svg class="icon"><use href="#i-maximize"/></svg> სრულ ეკრანზე გადადის.</li>
                 <li>დააყენეთ მაღვიძარა გრძელი შესვენებისთვის, მოკლე შესვენებისთვის და ცვლის დასრულებისთვის, და აირჩიეთ ხმა. როცა რეკავს, დაწკაპება ან <kbd>Esc</kbd> აჩერებს მას.</li>
             </ul>
             <h3><svg class="icon"><use href="#i-palette"/></svg>თემები</h3>
@@ -1112,7 +1145,8 @@
             </ul>
             <h3><svg class="icon"><use href="#i-puzzle"/></svg>विजेट</h3>
             <ul>
-                <li><svg class="icon"><use href="#i-puzzle"/></svg> बटन से घड़ी, अलार्म, नोट और आसमान चालू होते हैं। उन्हें कहीं भी खींचें, वे वहीं रहेंगे।</li>
+                <li><svg class="icon"><use href="#i-puzzle"/></svg> बटन से घड़ी, अलार्म, नोट, आसमान और डूम चालू होते हैं। उन्हें कहीं भी खींचें, वे वहीं रहेंगे।</li>
+                <li>डूम गेम (लगभग 6.5 MB) तभी डाउनलोड करता है जब आप <svg class="icon"><use href="#i-player-play"/></svg> दबाते हैं। तीर चलाते हैं, <kbd>Ctrl</kbd> फ़ायर करता है, <kbd>Space</kbd> दरवाज़े खोलता है, और <kbd>F</kbd> या <svg class="icon"><use href="#i-maximize"/></svg> पूर्ण स्क्रीन करता है।</li>
                 <li>लंबे ब्रेक, छोटे ब्रेक और शिफ़्ट के अंत के लिए अलार्म लगाएँ, और आवाज़ चुनें। जब अलार्म बजे, क्लिक करें या <kbd>Esc</kbd> दबाएँ।</li>
             </ul>
             <h3><svg class="icon"><use href="#i-palette"/></svg>थीम</h3>
@@ -1179,6 +1213,12 @@
     <div class="widget-bar"><span data-t="sky"></span><button class="close" type="button">×</button></div>
     <canvas id="skyCanvas" width="64" height="40"></canvas>
 </div>
+<div class="widget" id="w-doom" hidden>
+    <div class="widget-bar"><span data-t="doom"></span><span class="tools"><button id="doomFull" type="button" hidden><svg class="icon"><use href="#i-maximize"/></svg></button><button class="close" type="button">×</button></span></div>
+    <div id="doomScreen">
+        <button id="doomPlay" type="button"><svg class="icon"><use href="#i-player-play"/></svg><span dir="ltr">6.5 MB</span></button>
+    </div>
+</div>
 <div class="widget" id="w-note" hidden>
     <div class="widget-bar"><span data-t="note"></span><button class="close" type="button">×</button></div>
     <textarea id="noteText" dir="auto"></textarea>
@@ -1240,6 +1280,8 @@ const translations = {
         soundMeow: 'מיאו',
         note: 'פתק',
         sky: 'שמיים',
+        doom: 'דום',
+        fullscreen: 'מסך מלא',
         notePlaceholder: 'כתבו משהו…',
         close: 'סגירה',
         stop: 'עצירה',
@@ -1302,6 +1344,8 @@ const translations = {
         soundMeow: 'Meow',
         note: 'Note',
         sky: 'Sky',
+        doom: 'Doom',
+        fullscreen: 'Full screen',
         notePlaceholder: 'Write something…',
         close: 'Close',
         stop: 'Stop',
@@ -1364,6 +1408,8 @@ const translations = {
         soundMeow: 'مياو',
         note: 'ملاحظة',
         sky: 'السما',
+        doom: 'دوم',
+        fullscreen: 'ملء الشاشة',
         notePlaceholder: 'اكتبوا إشي…',
         close: 'سكّر',
         stop: 'وقّف',
@@ -1426,6 +1472,8 @@ const translations = {
         soundMeow: 'მიაუ',
         note: 'ჩანაწერი',
         sky: 'ცა',
+        doom: 'დუმი',
+        fullscreen: 'სრული ეკრანი',
         notePlaceholder: 'დაწერეთ რამე…',
         close: 'დახურვა',
         stop: 'გაჩერება',
@@ -1488,6 +1536,8 @@ const translations = {
         soundMeow: 'म्याऊँ',
         note: 'नोट',
         sky: 'आसमान',
+        doom: 'डूम',
+        fullscreen: 'पूर्ण स्क्रीन',
         notePlaceholder: 'कुछ लिखें…',
         close: 'बंद करें',
         stop: 'रोकें',
@@ -1862,14 +1912,14 @@ document.addEventListener('keydown', e => {
 
 // Widgets: small draggable panels, all off by default. Which ones are on,
 // where they sit and what they hold is remembered in localStorage.
-const WIDGETS = ['clock', 'alarm', 'note', 'sky'];
+const WIDGETS = ['clock', 'alarm', 'note', 'sky', 'doom'];
 let widgets = {};
 try { widgets = JSON.parse(store.get('widgets')) || {}; } catch {}
 for (const name of WIDGETS) widgets[name] = { on: false, ...widgets[name] };
 delete widgets.timer;   // removed widget
 const saveWidgets = () => store.set('widgets', JSON.stringify(widgets));
 const widgetEl = name => $(`w-${name}`);
-const DEFAULT_Y = { clock: 16, alarm: 112, note: 300, sky: 460 };
+const DEFAULT_Y = { clock: 16, alarm: 112, note: 300, sky: 460, doom: 16 };
 let topZ = 10;
 
 function translateWidgets() {
@@ -1878,6 +1928,7 @@ function translateWidgets() {
     document.querySelectorAll('.widget .close').forEach(el => { el.title = t.close; });
     $('widgetsBtn').title = t.widgets;
     $('noteText').placeholder = t.notePlaceholder;
+    $('doomFull').title = t.fullscreen;
 }
 
 // Position a widget, keeping it fully inside the window
@@ -1900,15 +1951,62 @@ function setWidget(name, on) {
         placeWidget(name, w.x ?? 16, w.y ?? DEFAULT_Y[name]);
     } else {
         stopRinging(el);
+        if (name === 'doom') stopDoom();
     }
     saveWidgets();
 }
+
+// Doom: the shareware episode in doom.html, framed so the engine keeps to
+// itself. Nothing downloads until Play (about 6.5 MB from jsDelivr), and
+// closing the widget drops the frame, so a closed game costs nothing.
+const doomPlay = $('doomPlay');
+
+function startDoom() {
+    const frame = document.createElement('iframe');
+    frame.src = 'doom.html';
+    frame.allow = 'fullscreen';
+    frame.title = 'Doom';
+    frame.addEventListener('load', () => frame.contentWindow.focus());
+    $('doomScreen').replaceChildren(frame);
+    $('doomFull').hidden = false;
+}
+
+function stopDoom() {
+    $('doomScreen').replaceChildren(doomPlay);
+    $('doomFull').hidden = true;
+    $('w-doom').classList.remove('big');
+}
+
+// Full screen from the button or F in the game (doom.html calls this).
+// Some hosts, like an app's built-in browser, never answer the request,
+// so if it hasn't happened in half a second the widget fills the window.
+function toggleDoomFull() {
+    const frame = $('doomScreen').querySelector('iframe');
+    if (!frame) return;
+    const widget = $('w-doom');
+    if (document.fullscreenElement) {
+        document.exitFullscreen();
+    } else if (widget.classList.contains('big')) {
+        widget.classList.remove('big');
+    } else {
+        const fallback = () => { if (!document.fullscreenElement) widget.classList.add('big'); };
+        frame.requestFullscreen?.().catch(fallback);
+        setTimeout(fallback, 500);
+    }
+    frame.contentWindow.focus();
+}
+
+document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement) $('w-doom').classList.remove('big');
+});
+doomPlay.addEventListener('click', startDoom);
+$('doomFull').addEventListener('click', toggleDoomFull);
 
 for (const name of WIDGETS) {
     const el = widgetEl(name);
     el.addEventListener('pointerdown', e => {
         el.style.zIndex = ++topZ;
-        if (e.button !== 0 || e.target.closest('input, textarea, select, button, label')) return;
+        if (e.button !== 0 || e.target.closest('input, textarea, select, button, label') || el.classList.contains('big')) return;
         const dx = e.clientX - el.offsetLeft;
         const dy = e.clientY - el.offsetTop;
         const move = e => placeWidget(name, e.clientX - dx, e.clientY - dy);
