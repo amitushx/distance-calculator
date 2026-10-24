@@ -3,6 +3,17 @@
 // window shows it once to everyone who ran an older version.
 const CHANGELOG = [
     {
+        version: '1.2.1',
+        date: '2026-10-24',
+        notes: {
+            he: ['חלון ״מה חדש״ מראה עכשיו את כל העדכונים מאז הביקור האחרון, לא רק את האחרון.'],
+            en: ['What’s new now shows every update since your last visit, not just the latest one.'],
+            ar: ['نافذة «شو الجديد» صارت تبيّن كل التحديثات من آخر زيارة، مش بس آخر واحد.'],
+            ka: ['ფანჯარა „რა არის ახალი“ ახლა აჩვენებს ყველა განახლებას ბოლო ვიზიტის შემდეგ, არა მხოლოდ ბოლოს.'],
+            hi: ['“नया क्या है” अब आपकी पिछली विज़िट के बाद के सभी अपडेट दिखाता है, सिर्फ़ आख़िरी नहीं।']
+        }
+    },
+    {
         version: '1.2.0',
         date: '2026-10-24',
         notes: {

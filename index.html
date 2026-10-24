@@ -1850,7 +1850,10 @@ const isNewer = (a, b) => {
 let newsAll = false;
 function renderNews() {
     const t = translations[lang];
-    const releases = newsAll ? CHANGELOG : CHANGELOG.slice(0, 1);
+    // What's new lists every release since the version last seen, so
+    // several releases shipped between visits are all shown
+    const unseen = CHANGELOG.filter(r => isNewer(r.version, versionSeen));
+    const releases = newsAll ? CHANGELOG : unseen.length ? unseen : CHANGELOG.slice(0, 1);
     $('newsTitle').textContent = newsAll ? t.changelog : t.whatsNew;
     $('changelogBtn').hidden = newsAll;
     $('newsBody').replaceChildren(...releases.map(r => {
