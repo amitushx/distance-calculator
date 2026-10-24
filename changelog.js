@@ -3,6 +3,17 @@
 // window shows it once to everyone who ran an older version.
 const CHANGELOG = [
     {
+        version: '1.2.0',
+        date: '2026-10-24',
+        notes: {
+            he: ['בשעון המעורר, + מוסיף הפסקה קצרה שנייה למשמרות ארוכות.'],
+            en: ['In the alarms, + adds a second short break for long shifts.'],
+            ar: ['بالمنبّه، + بيزيد استراحة قصيرة تانية للشفتات الطويلة.'],
+            ka: ['მაღვიძარაში + ამატებს მეორე მოკლე შესვენებას გრძელი ცვლებისთვის.'],
+            hi: ['अलार्म में, + लंबी शिफ़्ट के लिए दूसरा छोटा ब्रेक जोड़ता है।']
+        }
+    },
+    {
         version: '1.1.0',
         date: '2026-10-24',
         notes: {
